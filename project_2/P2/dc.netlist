@@ -1,0 +1,18 @@
+/////////////////////////////////////////////////////////////
+// Created by: Synopsys DC Expert(TM) in wire load mode
+// Version   : X-2025.06-SP4
+// Date      : Thu Feb 26 21:06:06 2026
+/////////////////////////////////////////////////////////////
+
+
+module p2 ( CLK, b, c, d, a );
+  input CLK, b, c, d;
+  output a;
+  wire   n3, n4, n5, n6;
+
+  FD1 a_reg ( .D(n3), .CP(CLK), .Q(a), .QN(n6) );
+  EO U6 ( .A(n6), .B(n4), .Z(n3) );
+  AO6 U7 ( .A(d), .B(n5), .C(c), .Z(n4) );
+  IV U8 ( .A(b), .Z(n5) );
+endmodule
+

@@ -1,0 +1,16 @@
+set target_library /pkgs/synopsys/2020/design_compiler/syn/Q-2019.12-SP3/libraries/syn/lsi_10k.db 
+set link_library /pkgs/synopsys/2020/design_compiler/syn/Q-2019.12-SP3/libraries/syn/lsi_10k.db 
+read_verilog MY_DESIGN.v
+current_design MY_DESIGN
+link
+check_design
+set_wire_load_model -name "10X10" -library lsi_10k
+create_clock -period 10 [get_ports clk]
+set_clock_latency 2 [get_clocks clk]
+set_clock_gating_style -sequential_cell latch
+insert_clock_gating
+compile
+report_power
+report_cell
+report_area
+write -format verilog -hierarchy -output dc.netlist

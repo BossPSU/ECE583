@@ -1,0 +1,276 @@
+/////////////////////////////////////////////////////////////
+// Created by: Synopsys DC Expert(TM) in wire load mode
+// Version   : X-2025.06-SP4
+// Date      : Thu Feb 26 22:07:19 2026
+/////////////////////////////////////////////////////////////
+
+
+module SNPS_CLOCK_GATE_HIGH_p3_cg_0 ( CLK, EN, ENCLK );
+  input CLK, EN;
+  output ENCLK;
+  wire   net150, net152, net153, net156;
+  assign net150 = CLK;
+  assign ENCLK = net152;
+  assign net153 = EN;
+
+  AN2P main_gate ( .A(net156), .B(net150), .Z(net152) );
+  LD2 latch ( .D(net153), .GN(net150), .Q(net156) );
+endmodule
+
+
+module SNPS_CLOCK_GATE_HIGH_p3_cg_1 ( CLK, EN, ENCLK );
+  input CLK, EN;
+  output ENCLK;
+  wire   net150, net152, net153, net156;
+  assign net150 = CLK;
+  assign ENCLK = net152;
+  assign net153 = EN;
+
+  AN2P main_gate ( .A(net156), .B(net150), .Z(net152) );
+  LD2 latch ( .D(net153), .GN(net150), .Q(net156) );
+endmodule
+
+
+module p3_cg ( clk, rst_n, start_btn, pause_btn, cancel_btn, mode_sel, 
+        opt_extra_rinse, opt_high_spin, door_closed, water_ok, temp_ok, 
+        level_full, level_empty, imbalance, timer_done, valve_inlet, pump_out, 
+        motor_agitate, motor_spin, heater_on, door_lock, alarm, done_led, 
+        state_id );
+  input [1:0] mode_sel;
+  output [5:0] state_id;
+  input clk, rst_n, start_btn, pause_btn, cancel_btn, opt_extra_rinse,
+         opt_high_spin, door_closed, water_ok, temp_ok, level_full,
+         level_empty, imbalance, timer_done;
+  output valve_inlet, pump_out, motor_agitate, motor_spin, heater_on,
+         door_lock, alarm, done_led;
+  wire   n318, n319, n320, n321, n322, extra_rinse_q, high_spin_q, N385, N411,
+         N432, N443, N454, N470, N545, net162, net167, n1, n16, n20, n22, n23,
+         n149, n151, n152, n155, n156, n157, n158, n159, n160, n161, n162,
+         n163, n164, n165, n166, n167, n168, n169, n170, n171, n172, n173,
+         n174, n176, n177, n178, n179, n181, n182, n183, n184, n185, n186,
+         n187, n188, n189, n190, n191, n192, n193, n194, n195, n196, n197,
+         n198, n199, n200, n201, n202, n203, n204, n205, n206, n207, n208,
+         n209, n210, n211, n212, n213, n214, n215, n216, n217, n218, n219,
+         n220, n221, n222, n223, n224, n225, n226, n227, n228, n229, n231,
+         n232, n233, n234, n235, n236, n237, n238, n239, n240, n241, n242,
+         n243, n244, n245, n246, n247, n248, n249, n250, n251, n252, n253,
+         n254, n255, n256, n257, n258, n259, n260, n261, n262, n263, n264,
+         n265, n266, n267, n268, n269, n270, n271, n272, n273, n275, n276,
+         n277, n278, n279, n280, n281, n282, n283, n284, n285, n286, n287,
+         n288, n289, n290, n291, n292, n293, n294, n295, n296, n297, n298,
+         n299, n300, n301, n302, n303, n304, n305, n306, n307, n308, n309,
+         n310, n311, n312, n313, n314, n315, n316, n317;
+  wire   [1:0] mode_q;
+  wire   [4:0] next_state;
+  assign state_id[5] = 1'b0;
+  assign valve_inlet = N385;
+  assign pump_out = N411;
+  assign motor_agitate = N432;
+  assign motor_spin = N443;
+  assign heater_on = N454;
+  assign alarm = N470;
+
+  SNPS_CLOCK_GATE_HIGH_p3_cg_0 clk_gate_high_spin_q_reg ( .CLK(clk), .EN(n149), 
+        .ENCLK(net162) );
+  SNPS_CLOCK_GATE_HIGH_p3_cg_1 clk_gate_state_reg ( .CLK(clk), .EN(N545), 
+        .ENCLK(net167) );
+  FD2 high_spin_q_reg ( .D(opt_high_spin), .CP(net162), .CD(rst_n), .Q(
+        high_spin_q) );
+  FD2 \mode_q_reg[1]  ( .D(mode_sel[1]), .CP(net162), .CD(rst_n), .Q(mode_q[1]), .QN(n1) );
+  FD2 \mode_q_reg[0]  ( .D(mode_sel[0]), .CP(net162), .CD(rst_n), .Q(mode_q[0]) );
+  FD2 extra_rinse_q_reg ( .D(opt_extra_rinse), .CP(net162), .CD(rst_n), .Q(
+        extra_rinse_q) );
+  FD2P \state_reg[0]  ( .D(next_state[0]), .CP(net167), .CD(rst_n), .Q(n322), 
+        .QN(n23) );
+  FD2P \state_reg[2]  ( .D(next_state[2]), .CP(net167), .CD(rst_n), .Q(n320), 
+        .QN(n179) );
+  FD2P \state_reg[3]  ( .D(next_state[3]), .CP(net167), .CD(rst_n), .Q(n319), 
+        .QN(n20) );
+  FD2P \state_reg[4]  ( .D(next_state[4]), .CP(net167), .CD(rst_n), .Q(n318), 
+        .QN(n16) );
+  FD2 \state_reg[1]  ( .D(next_state[1]), .CP(net167), .CD(rst_n), .Q(n321), 
+        .QN(n22) );
+  AN2P U162 ( .A(n20), .B(n179), .Z(n151) );
+  IVDA U163 ( .A(n318), .Y(n152), .Z(state_id[4]) );
+  AN2P U164 ( .A(n171), .B(n174), .Z(done_led) );
+  AN2P U165 ( .A(n275), .B(n266), .Z(n155) );
+  AN2P U166 ( .A(n168), .B(state_id[0]), .Z(n156) );
+  AN2P U167 ( .A(n269), .B(state_id[4]), .Z(n157) );
+  AN2P U168 ( .A(n202), .B(n201), .Z(n158) );
+  AN2P U169 ( .A(n233), .B(n286), .Z(n159) );
+  AN2P U170 ( .A(n248), .B(n279), .Z(n160) );
+  AN2P U171 ( .A(n269), .B(n16), .Z(n161) );
+  IVA U172 ( .A(n215), .Z(n302) );
+  AN3 U173 ( .A(n301), .B(n225), .C(n164), .Z(n162) );
+  IVP U174 ( .A(state_id[0]), .Z(n163) );
+  AO1 U175 ( .A(door_closed), .B(n261), .C(n260), .D(n259), .Z(n265) );
+  AN2 U176 ( .A(n320), .B(n319), .Z(n177) );
+  ND2 U177 ( .A(n156), .B(n273), .Z(n164) );
+  AN2P U178 ( .A(n302), .B(n301), .Z(n165) );
+  AN3 U179 ( .A(n248), .B(n277), .C(n234), .Z(n166) );
+  ND4 U180 ( .A(n277), .B(n284), .C(n235), .D(n282), .Z(n220) );
+  AN3 U181 ( .A(n286), .B(n285), .C(n284), .Z(n167) );
+  AO7 U182 ( .A(done_led), .B(n291), .C(n290), .Z(n300) );
+  ND2 U183 ( .A(n156), .B(n273), .Z(n280) );
+  AN2P U184 ( .A(n177), .B(n152), .Z(n168) );
+  ND2 U185 ( .A(n176), .B(n169), .Z(n235) );
+  AN2P U186 ( .A(n203), .B(state_id[4]), .Z(n169) );
+  IVP U187 ( .A(n293), .Z(n203) );
+  ND4 U188 ( .A(n158), .B(n253), .C(n214), .D(n213), .Z(next_state[1]) );
+  AN3 U189 ( .A(n176), .B(n275), .C(n273), .Z(n170) );
+  ND2 U190 ( .A(n184), .B(n170), .Z(n226) );
+  NR2 U191 ( .A(state_id[4]), .B(n293), .Z(n294) );
+  AO6 U192 ( .A(n310), .B(n309), .C(n308), .Z(n311) );
+  IVP U193 ( .A(timer_done), .Z(n309) );
+  AO6 U194 ( .A(n167), .B(n307), .C(level_full), .Z(n308) );
+  AO3 U195 ( .A(pause_btn), .B(n165), .C(n305), .D(n166), .Z(n310) );
+  AO6 U196 ( .A(n317), .B(n316), .C(n315), .Z(N545) );
+  ND2 U197 ( .A(cancel_btn), .B(n313), .Z(n316) );
+  NR2 U198 ( .A(start_btn), .B(n314), .Z(n315) );
+  ND2 U199 ( .A(n312), .B(n311), .Z(n317) );
+  NR2 U200 ( .A(n192), .B(n191), .Z(n222) );
+  ND2 U201 ( .A(n285), .B(n313), .Z(n191) );
+  ND4 U202 ( .A(n159), .B(n223), .C(n222), .D(n221), .Z(n224) );
+  AO3 U203 ( .A(high_spin_q), .B(n248), .C(n229), .D(n228), .Z(next_state[3])
+         );
+  ND2 U204 ( .A(temp_ok), .B(n304), .Z(n305) );
+  IVP U205 ( .A(n303), .Z(n304) );
+  NR2 U206 ( .A(n1), .B(mode_q[0]), .Z(n199) );
+  IVP U207 ( .A(level_empty), .Z(n296) );
+  IVDA U208 ( .A(n177), .Z(n171) );
+  IVDA U209 ( .A(n176), .Z(n172) );
+  AN2P U210 ( .A(n271), .B(n22), .Z(n173) );
+  AN2P U211 ( .A(n271), .B(n273), .Z(n174) );
+  IVDA U212 ( .A(n178), .Y(state_id[0]) );
+  AN2P U213 ( .A(n20), .B(n320), .Z(n176) );
+  IV U214 ( .A(n322), .Z(n178) );
+  IVP U215 ( .A(n179), .Z(state_id[2]) );
+  AO7 U216 ( .A(n295), .B(n294), .C(n176), .Z(n299) );
+  ND2P U217 ( .A(n176), .B(n173), .Z(n232) );
+  IV U218 ( .A(n318), .Z(n181) );
+  ND2P U219 ( .A(n247), .B(n163), .Z(n314) );
+  ND2P U220 ( .A(n318), .B(n322), .Z(n186) );
+  ND2P U221 ( .A(n269), .B(n168), .Z(n233) );
+  B5I U222 ( .A(n187), .Z(n269) );
+  AN4 U223 ( .A(n300), .B(n299), .C(n298), .D(n297), .Z(n312) );
+  ND2 U224 ( .A(n296), .B(N411), .Z(n297) );
+  AN4 U225 ( .A(n263), .B(n162), .C(n227), .D(n226), .Z(n228) );
+  IVP U226 ( .A(n226), .Z(n219) );
+  IV U227 ( .A(n186), .Z(n182) );
+  IV U228 ( .A(n186), .Z(n271) );
+  IVA U229 ( .A(n321), .Z(n273) );
+  IV U230 ( .A(n22), .Z(state_id[1]) );
+  ND2P U231 ( .A(n155), .B(n273), .Z(n287) );
+  AN2 U232 ( .A(n237), .B(n236), .Z(n238) );
+  IVDA U233 ( .A(n306), .Z(n183) );
+  IV U234 ( .A(n289), .Z(n207) );
+  ND2 U235 ( .A(n289), .B(n288), .Z(n291) );
+  OR2P U236 ( .A(n23), .B(n246), .Z(n289) );
+  ND2 U237 ( .A(state_id[1]), .B(n156), .Z(n190) );
+  ND2 U238 ( .A(n157), .B(n266), .Z(n288) );
+  ND2 U239 ( .A(n157), .B(n151), .Z(n279) );
+  ND2 U240 ( .A(n157), .B(n171), .Z(n283) );
+  NR2 U241 ( .A(n273), .B(n292), .Z(n295) );
+  ND2 U242 ( .A(n190), .B(n278), .Z(n215) );
+  IV U243 ( .A(n320), .Z(n189) );
+  ND2P U244 ( .A(n322), .B(n181), .Z(n292) );
+  IV U245 ( .A(n20), .Z(state_id[3]) );
+  ND2P U246 ( .A(n189), .B(n319), .Z(n268) );
+  B5I U247 ( .A(n268), .Z(n266) );
+  ND2P U248 ( .A(n178), .B(n22), .Z(n187) );
+  ND2P U249 ( .A(n157), .B(n176), .Z(n248) );
+  IV U250 ( .A(n287), .Z(n306) );
+  AO3 U251 ( .A(n236), .B(n287), .C(n232), .D(n283), .Z(n192) );
+  ND2 U252 ( .A(door_closed), .B(n183), .Z(n307) );
+  ND2P U253 ( .A(n23), .B(n321), .Z(n293) );
+  EON1P U254 ( .A(n303), .B(n205), .C(imbalance), .D(n204), .Z(n259) );
+  ND2 U255 ( .A(mode_q[0]), .B(mode_q[1]), .Z(n218) );
+  IVA U256 ( .A(n218), .Z(n185) );
+  ND2 U257 ( .A(water_ok), .B(door_closed), .Z(n198) );
+  IVA U258 ( .A(n198), .Z(n184) );
+  IVA U259 ( .A(n292), .Z(n275) );
+  ND2 U260 ( .A(n185), .B(n219), .Z(n214) );
+  ND3 U261 ( .A(n266), .B(n182), .C(state_id[1]), .Z(n231) );
+  ND2 U262 ( .A(n168), .B(n203), .Z(n286) );
+  ND3 U263 ( .A(n266), .B(n203), .C(n152), .Z(n303) );
+  ND4 U264 ( .A(n159), .B(n303), .C(n164), .D(n288), .Z(n188) );
+  ND2 U265 ( .A(n155), .B(state_id[1]), .Z(n301) );
+  IVA U266 ( .A(n301), .Z(n241) );
+  IVA U267 ( .A(cancel_btn), .Z(n236) );
+  IVA U268 ( .A(pause_btn), .Z(n255) );
+  ND2 U269 ( .A(n236), .B(n255), .Z(n216) );
+  AO2 U270 ( .A(cancel_btn), .B(n188), .C(n241), .D(n216), .Z(n195) );
+  ND3 U271 ( .A(n176), .B(n182), .C(state_id[1]), .Z(n277) );
+  ND2 U272 ( .A(n174), .B(n151), .Z(n284) );
+  ND3 U273 ( .A(n182), .B(n151), .C(state_id[1]), .Z(n282) );
+  IVA U274 ( .A(n220), .Z(n193) );
+  ND2 U275 ( .A(n169), .B(n151), .Z(n278) );
+  ND2 U276 ( .A(n169), .B(n266), .Z(n285) );
+  ND2 U277 ( .A(n174), .B(n266), .Z(n313) );
+  AN4P U278 ( .A(n193), .B(n302), .C(n160), .D(n222), .Z(n194) );
+  ND4 U279 ( .A(n214), .B(n231), .C(n195), .D(n194), .Z(next_state[4]) );
+  IVA U280 ( .A(door_closed), .Z(n211) );
+  ND2 U281 ( .A(n306), .B(n211), .Z(n196) );
+  ND4 U282 ( .A(n164), .B(n286), .C(n196), .D(n282), .Z(n197) );
+  AO2 U283 ( .A(n170), .B(n198), .C(n197), .D(n236), .Z(n202) );
+  OR3 U284 ( .A(cancel_btn), .B(n199), .C(extra_rinse_q), .Z(n251) );
+  IVA U285 ( .A(n251), .Z(n200) );
+  IVA U286 ( .A(n279), .Z(n252) );
+  ND2 U287 ( .A(n200), .B(n252), .Z(n201) );
+  ND3 U288 ( .A(n16), .B(n203), .C(n151), .Z(n253) );
+  IVA U289 ( .A(n216), .Z(n240) );
+  IVA U290 ( .A(n278), .Z(n256) );
+  ND2 U291 ( .A(n176), .B(n161), .Z(n244) );
+  IVA U292 ( .A(n244), .Z(n212) );
+  ND2 U293 ( .A(timer_done), .B(temp_ok), .Z(n205) );
+  IVA U294 ( .A(n235), .Z(n204) );
+  IVA U295 ( .A(n259), .Z(n209) );
+  ND3 U296 ( .A(n273), .B(n16), .C(n151), .Z(n246) );
+  IVA U297 ( .A(n277), .Z(n206) );
+  AO1P U298 ( .A(level_full), .B(n306), .C(n207), .D(n206), .Z(n208) );
+  ND4 U299 ( .A(n209), .B(n285), .C(n284), .D(n208), .Z(n210) );
+  AO11 U300 ( .A(n240), .B(n256), .C(n212), .D(n211), .E(n210), .F(n236), .Z(
+        n213) );
+  ND2 U301 ( .A(n231), .B(n303), .Z(N454) );
+  ND2 U302 ( .A(n160), .B(n288), .Z(n217) );
+  AO2 U303 ( .A(cancel_btn), .B(n217), .C(n216), .D(n215), .Z(n229) );
+  ND3 U304 ( .A(n219), .B(temp_ok), .C(n218), .Z(n223) );
+  ND2 U305 ( .A(cancel_btn), .B(n220), .Z(n221) );
+  IVA U306 ( .A(n224), .Z(n263) );
+  IVA U307 ( .A(N454), .Z(n225) );
+  ND3 U308 ( .A(level_full), .B(door_closed), .C(n183), .Z(n227) );
+  AN3 U309 ( .A(n275), .B(n151), .C(n321), .Z(n239) );
+  AN3 U310 ( .A(n233), .B(n232), .C(n231), .Z(n234) );
+  ND4 U311 ( .A(n166), .B(n288), .C(n235), .D(n283), .Z(n237) );
+  AO1P U312 ( .A(n241), .B(n240), .C(n239), .D(n238), .Z(n242) );
+  ND4 U313 ( .A(n158), .B(n313), .C(n244), .D(n242), .Z(next_state[2]) );
+  IVA U314 ( .A(water_ok), .Z(n243) );
+  ND2 U315 ( .A(n170), .B(n243), .Z(n245) );
+  ND2 U316 ( .A(n245), .B(n244), .Z(n261) );
+  IVA U317 ( .A(n246), .Z(n247) );
+  IVA U318 ( .A(n314), .Z(n250) );
+  IVA U319 ( .A(n248), .Z(n249) );
+  AO1P U320 ( .A(n252), .B(n251), .C(n250), .D(n249), .Z(n258) );
+  IVA U321 ( .A(n253), .Z(n149) );
+  IVA U322 ( .A(n288), .Z(n254) );
+  AO1P U323 ( .A(n256), .B(n255), .C(n149), .D(n254), .Z(n257) );
+  ND2 U324 ( .A(n258), .B(n257), .Z(n260) );
+  ND2 U325 ( .A(n162), .B(n302), .Z(n262) );
+  MUX21L U326 ( .A(done_led), .B(n262), .S(cancel_btn), .Z(n264) );
+  ND3 U327 ( .A(n265), .B(n264), .C(n263), .Z(next_state[0]) );
+  ND2 U328 ( .A(n161), .B(n266), .Z(n298) );
+  ND3 U329 ( .A(state_id[1]), .B(n16), .C(n172), .Z(n267) );
+  ND2 U330 ( .A(n298), .B(n267), .Z(N470) );
+  ND2 U331 ( .A(state_id[1]), .B(state_id[3]), .Z(n272) );
+  ND2 U332 ( .A(state_id[2]), .B(n273), .Z(n270) );
+  AO12P U333 ( .A(state_id[4]), .B(n272), .C(n182), .D(n270), .E(state_id[3]), 
+        .F(n16), .G(n269), .H(n268), .Z(door_lock) );
+  AN3 U334 ( .A(n172), .B(n273), .C(state_id[4]), .Z(N443) );
+  ND3 U335 ( .A(n321), .B(n275), .C(state_id[3]), .Z(n276) );
+  ND3 U336 ( .A(n278), .B(n277), .C(n276), .Z(N432) );
+  AN3 U337 ( .A(n280), .B(n313), .C(n279), .Z(n281) );
+  ND3 U338 ( .A(n283), .B(n282), .C(n281), .Z(N411) );
+  ND2 U339 ( .A(n167), .B(n287), .Z(N385) );
+  IVA U340 ( .A(start_btn), .Z(n290) );
+endmodule
+
