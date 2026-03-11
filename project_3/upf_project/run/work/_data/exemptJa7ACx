@@ -1,0 +1,457 @@
+`line 2 "mspa_models.v" 1
+
+`mspa_module
+
+module mspa_iso_chk_cell #(parameter chkid = 0) (
+input isolation_input, 
+output reg isolation_output,
+input clamp_value,
+input bit_type,clamp_latch,power,isolation_signal,
+input sink_pwr,
+input int portid,pdid,
+input [4:0] cctrl);
+
+always@(power,isolation_signal,isolation_input)
+begin : pcs
+		if(power)
+		begin
+			if(isolation_signal === 1'bx)
+				isolation_output = bit_type ? 'b0 : 'bx;
+			else if(isolation_signal === 1'b1) begin
+				if(clamp_latch !== 1)
+					isolation_output = clamp_value;
+			end else
+				isolation_output = isolation_input;
+		end
+		else
+			isolation_output = bit_type ? 'b0 : 'bx;
+	end
+
+endmodule
+module mspa_iso_chk_cell_vec #(parameter chkid = 0, msb = 0) (
+input [msb:0] isolation_input, 
+output reg [msb:0]isolation_output,
+input [msb:0]clamp_value,
+input bit_type,clamp_latch,power,isolation_signal,
+input sink_pwr,
+input int portid,pdid,
+input [4:0] cctrl);
+
+always@(power,isolation_signal,isolation_input)
+begin : pcs
+		if(power)
+		begin
+			if(isolation_signal === 1'bx)
+				isolation_output = bit_type ? 'b0 : 'bx;
+			else if(isolation_signal === 1'b1) begin
+				if(clamp_latch !== 1)
+					isolation_output = clamp_value;
+			end else
+				isolation_output = isolation_input;
+		end
+		else
+			isolation_output = bit_type ? 'b0 : 'bx;
+	end
+
+endmodule
+
+module mspa_iso_chk_cell_u_vec #(parameter chkid = 0, msb = 0) (
+input isolation_input [msb:0] , 
+output reg isolation_output [msb:0],
+input [msb:0]clamp_value,
+input bit_type,clamp_latch,power,isolation_signal,
+input sink_pwr,
+input int portid,pdid,
+input [4:0] cctrl);
+
+for(genvar g=0;g<=msb;g=g+1) begin: qspa_iso_cell_chks
+	always@(power,isolation_signal,isolation_input[g])
+	begin : pcs
+			if(power)
+			begin
+			if(isolation_signal === 1'bx)
+				isolation_output[g] = bit_type ? 'b0 : 'bx;
+			else if(isolation_signal === 1'b1) begin
+				if(clamp_latch !== 1)
+					isolation_output[g] = clamp_value[g];
+			end else
+				isolation_output[g] = isolation_input[g];
+		end
+		else
+			isolation_output[g] = bit_type ? 'b0 : 'bx;
+	end
+
+end
+endmodule
+
+module mspa_iso_chk_cell_u_2state_vec #(parameter chkid = 0, msb = 0) (
+input bit isolation_input [msb:0] , 
+output bit isolation_output [msb:0],
+input [msb:0]clamp_value,
+input bit_type,clamp_latch,power,isolation_signal,
+input sink_pwr,
+input int portid,pdid,
+input [4:0] cctrl);
+
+for(genvar g=0;g<=msb;g=g+1) begin: qspa_iso_cell_chks
+	always@(power,isolation_signal,isolation_input[g])
+	begin : pcs
+			if(power)
+			begin
+			if(isolation_signal === 1'bx)
+				isolation_output[g] = 'b0;
+			else if(isolation_signal === 1'b1) begin
+				if(clamp_latch !== 1)
+					isolation_output[g] = clamp_value[g];
+			end else
+				isolation_output[g] = isolation_input[g];
+		end
+		else
+			isolation_output[g] = 'b0;
+	end
+
+end
+endmodule
+
+module mspa_iso_chk_cell_multi #(parameter chkid = 0, level = 0) (
+input isolation_input, 
+output isolation_output,
+input [level:0]clamp_value,
+input [level:0]clamp_latch,power,isolation_signal,
+input bit_type,sink_pwr,
+input int portid,pdid,
+input [4:0] cctrl);
+
+int i;
+reg [level:0]iso_level_out;
+always@(power,isolation_signal,isolation_input)
+begin : pcs
+	for(i=level; i >= 0; i=i-1) begin
+		if(power[i])
+		begin
+			if(isolation_signal[i] === 1'bx)
+				iso_level_out[i] = bit_type ? 'b0 : 'bx;
+			else if(isolation_signal[i] === 1'b1) begin
+				if(clamp_latch[i] != 1)
+					iso_level_out[i] = clamp_value[i];
+			end else
+				iso_level_out[i] = (i === level) ? isolation_input : iso_level_out[i+1];
+		end
+		else
+			iso_level_out[i] = bit_type ? 'b0 : 'bx;
+	end
+end
+
+assign isolation_output = iso_level_out[0];
+
+endmodule
+module mspa_iso_chk_cell_multi_vec #(parameter chkid = 0, msb = 0, level = 0) (
+input [msb:0] isolation_input, 
+output [msb:0]isolation_output,
+input [level:0][msb:0]clamp_value,
+input [level:0]clamp_latch,power,isolation_signal,
+input bit_type,sink_pwr,
+input int portid,pdid,
+input [4:0] cctrl);
+
+int i;
+reg [level:0][msb:0]iso_level_out;
+always@(power,isolation_signal,isolation_input)
+begin : pcs
+	for(i=level; i >= 0; i=i-1) begin
+		if(power[i])
+		begin
+			if(isolation_signal[i] === 1'bx)
+				iso_level_out[i] = bit_type ? 'b0 : 'bx;
+			else if(isolation_signal[i] === 1'b1) begin
+				if(clamp_latch[i] != 1)
+					iso_level_out[i] = clamp_value[i];
+			end else
+				iso_level_out[i] = (i === level) ? isolation_input : iso_level_out[i+1];
+		end
+		else
+			iso_level_out[i] = bit_type ? 'b0 : 'bx;
+	end
+end
+
+assign isolation_output = iso_level_out[0];
+
+endmodule
+
+module mspa_iso_chk_cell_multi_u_vec #(parameter chkid = 0, msb = 0, level = 0) (
+input isolation_input [msb:0] , 
+output isolation_output [msb:0],
+input [level:0][msb:0]clamp_value,
+input [level:0]clamp_latch,power,isolation_signal,
+input bit_type,sink_pwr,
+input int portid,pdid,
+input [4:0] cctrl);
+
+int i;
+reg [level:0][msb:0]iso_level_out;
+
+for(genvar g=0;g<=msb;g=g+1) begin: qspa_iso_cell_chks
+	always@(power,isolation_signal,isolation_input[g])
+	begin : pcs
+	  for(i=level; i >= 0; i=i-1) begin
+			if(power[i])
+			begin
+				if(isolation_signal[i] === 1'bx)
+					iso_level_out[i][g] = bit_type ? 'b0 : 'bx;
+				else if(isolation_signal[i] === 1'b1) begin
+					if(clamp_latch[i] != 1)
+						iso_level_out[i][g] = clamp_value[i];
+				end else
+					iso_level_out[i][g] = (i === level) ? isolation_input[g] : iso_level_out[i+1][g];
+			end
+			else
+				iso_level_out[i][g] = bit_type ? 'b0 : 'bx;
+		end
+	end
+	assign isolation_output[g] = iso_level_out[0][g];
+end
+endmodule
+
+
+module mspa_iso_chk_cell_multi_u_2state_vec #(parameter chkid = 0, msb = 0, level = 0) (
+input bit isolation_input [msb:0] , 
+output bit isolation_output [msb:0],
+input [level:0][msb:0]clamp_value,
+input [level:0]clamp_latch,power,isolation_signal,
+input bit_type,sink_pwr,
+input int portid,pdid,
+input [4:0] cctrl);
+
+int i;
+bit [level:0][msb:0]iso_level_out;
+
+for(genvar g=0;g<=msb;g=g+1) begin: qspa_iso_cell_chks
+	always@(power,isolation_signal,isolation_input[g])
+	begin : pcs
+	  for(i=level; i >= 0; i=i-1) begin
+			if(power[i])
+			begin
+				if(isolation_signal[i] === 1'bx)
+					iso_level_out[i][g] = 'b0;
+				else if(isolation_signal[i] === 1'b1) begin
+					if(clamp_latch[i] != 1)
+						iso_level_out[i][g] = clamp_value[i];
+				end else
+					iso_level_out[i][g] = (i === level) ? isolation_input[g] : iso_level_out[i+1][g];
+			end
+			else
+				iso_level_out[i][g] = 'b0;
+		end
+	end
+	assign isolation_output[g] = iso_level_out[0][g];
+end
+endmodule
+
+// LS
+module mspa_ls_cell(ls_input,ls_output,internal_supply);
+	input wire internal_supply;
+	input ls_input;
+	output reg ls_output;
+	always@(internal_supply,ls_input)
+	begin : pcs
+		if(internal_supply)
+			ls_output = ls_input;
+		else
+			ls_output = 1'bx;
+	end
+endmodule
+
+// packed array
+module mspa_ls_cell_vec(ls_input,ls_output,internal_supply);
+	parameter msb = 0;
+	input wire internal_supply;
+	input [msb:0]ls_input;
+	output reg [msb:0]ls_output;
+	always@(internal_supply,ls_input)
+	begin : pcs
+		if(internal_supply)
+			ls_output = ls_input;
+		else
+			ls_output = 'bx;
+	end
+endmodule
+
+// unpacked array
+module mspa_ls_cell_u_vec(ls_input,ls_output,internal_supply);
+	parameter msb = 0;
+	input wire internal_supply;
+	input ls_input[msb:0];
+	output reg ls_output[msb:0];
+	for(genvar i=0;i<=msb;i=i+1) begin : gen1
+		always@(internal_supply,ls_input[i])
+		begin : pcs
+			if(internal_supply)
+				ls_output[i] = ls_input[i];
+			else
+				ls_output[i] = 1'bx;
+		end
+	end
+endmodule
+
+module mspa_ls_cell_u_2state_vec(ls_input,ls_output,internal_supply);
+	parameter msb = 0;
+	input wire internal_supply;
+	input bit ls_input[msb:0];
+	output bit ls_output[msb:0];
+	for(genvar i=0;i<=msb;i=i+1) begin : gen1
+		always@(internal_supply,ls_input[i])
+		begin : pcs
+			if(internal_supply)
+				ls_output[i] = ls_input[i];
+			else
+				ls_output[i] = 1'b0;
+		end
+	end
+endmodule
+
+
+// RS buffers
+// single bit
+module mspa_rs_buf(buf_input,buf_output,power);
+	input wire power;
+	input buf_input;
+	output reg buf_output;
+	always@(power,buf_input)
+	begin : pcs
+		if(power)
+			buf_output = buf_input;
+		else
+			buf_output = 1'bx;
+	end
+endmodule
+
+// packed array
+module mspa_rs_buf_vec(buf_input,buf_output,power);
+	parameter msb = 0;
+	input wire power;
+	input [msb:0]buf_input;
+	output reg [msb:0]buf_output;
+	always@(power,buf_input)
+	begin : pcs
+		if(power)
+			buf_output = buf_input;
+		else
+			buf_output = 'bx;
+	end
+endmodule
+
+// unpacked array
+module mspa_rs_buf_u_vec(buf_input,buf_output,power);
+	parameter msb = 0;
+	input wire power;
+	input buf_input[msb:0];
+	output reg buf_output[msb:0];
+	for(genvar i=0;i<=msb;i=i+1) begin: gen1
+		always@(power,buf_input[i])
+		begin : pcs
+			if(power)
+				buf_output[i] = buf_input[i];
+			else
+				buf_output[i] = 1'bx;
+		end
+	end
+endmodule
+
+module mspa_rs_buf_u_2state_vec(buf_input,buf_output,power);
+	parameter msb = 0;
+	input wire power;
+	input bit buf_input[msb:0];
+	output bit buf_output[msb:0];
+	for(genvar i=0;i<=msb;i=i+1) begin: gen1
+		always@(power,buf_input[i])
+		begin : pcs
+			if(power)
+				buf_output[i] = buf_input[i];
+			else
+				buf_output[i] = 1'b0;
+		end
+	end
+endmodule
+
+// single bit
+module mspa_rs_buf_ss(buf_input,buf_output,power,coa_sig,coa_neg);
+	input wire power,coa_sig,coa_neg;
+	input buf_input;
+	output reg buf_output;
+	always@(power,coa_neg,buf_input)
+	begin : pcs
+		if(power & ~(coa_sig))
+			buf_output = buf_input;
+		else
+			buf_output = 1'bx;
+	end
+endmodule
+
+// packed array
+module mspa_rs_buf_ss_vec(buf_input,buf_output,power,coa_sig,coa_neg);
+	parameter msb = 0;
+	input wire power,coa_sig,coa_neg;
+	input [msb:0]buf_input;
+	output reg [msb:0]buf_output;
+	always@(power,coa_neg,buf_input)
+	begin : pcs
+		if(power & ~(coa_sig))
+			buf_output = buf_input;
+		else
+			buf_output = 'bx;
+	end
+endmodule
+
+// unpacked array
+module mspa_rs_buf_ss_u_vec(buf_input,buf_output,power,coa_sig,coa_neg);
+	parameter msb = 0;
+	input wire power,coa_sig,coa_neg;
+	input buf_input[msb:0];
+	output reg buf_output[msb:0];
+	for(genvar i=0;i<=msb;i=i+1) begin: gen1
+		always@(power,coa_neg,buf_input[i])
+		begin : pcs
+			if(power & ~(coa_sig))
+				buf_output[i] = buf_input[i];
+			else
+				buf_output[i] = 1'bx;
+		end
+	end
+endmodule
+
+module mspa_rs_buf_ss_u_2state_vec(buf_input,buf_output,power,coa_sig,coa_neg);
+	parameter msb = 0;
+	input wire power,coa_sig,coa_neg;
+	input bit buf_input[msb:0];
+	output bit buf_output[msb:0];
+	for(genvar i=0;i<=msb;i=i+1) begin: gen1
+		always@(power,coa_neg,buf_input[i])
+		begin : pcs
+			if(power & ~(coa_sig))
+				buf_output[i] = buf_input[i];
+			else
+				buf_output[i] = 1'b0;
+		end
+	end
+endmodule
+
+
+
+primitive qpa_udp_ret_latch (op, qin, store_val, store_x);
+output op; reg op;
+input qin, store_val, store_x;
+initial op = 1'bx;
+table
+// qin   store_val   store_x     op      op+
+    ?       ?           1      :  ?    :  x;
+    ?       ?           x      :  ?    :  x;
+    ?       x           0      :  ?    :  x;
+    ?      (?x)         0      :  ?    :  x;
+    1      (?1)         0      :  ?    :  1;
+    0      (?1)         0      :  ?    :  0;
+    x      (?1)         0      :  ?    :  x;
+    ?      (?0)         0      :  ?    :  -;
+   (??)   ?           0      :  ?    :  -;
+endtable
+endprimitive
+

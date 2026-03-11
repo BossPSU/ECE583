@@ -1,0 +1,343 @@
+`line 2 "mspa_upf.sv" 1
+
+`mspa_module
+
+module qpa_flat_mod_testO;
+	import UPF::*;
+	
+/* Declaration of Port Nets */
+
+	UPF::supply_net_type mspa13_QPA_AON_DUMMY_NET_obj = '{UPF::FULL_ON,0};
+	reg mspa8_restore_ctrl_SIG;
+	reg mspa7_save_ctrl_SIG;
+	UPF::supply_net_type anonSN21_internal_supply_set_power = '{UPF::OFF,0};
+	UPF::supply_net_type anonSN20_internal_supply_set_ground = '{UPF::OFF,0};
+	UPF::supply_net_type anonSN19_output_supply_set_power = '{UPF::OFF,0};
+	UPF::supply_net_type anonSN18_output_supply_set_ground = '{UPF::OFF,0};
+	UPF::supply_net_type anonSN17_input_supply_set_power = '{UPF::OFF,0};
+	UPF::supply_net_type anonSN16_input_supply_set_ground = '{UPF::OFF,0};
+	reg mspa5_iso_ctrl_SIG;
+	UPF::supply_net_type anonSN13_supply_power = '{UPF::OFF,0};
+	UPF::supply_net_type anonSN12_supply_ground = '{UPF::OFF,0};
+	reg mspa2_pwr_en_SIG;
+	UPF::supply_net_type mspa14_vout_obj;
+	UPF::supply_net_type mspa15_VSS_obj = '{UPF::OFF,0};
+	UPF::supply_net_type mspa16_VDD_PG_obj = '{UPF::OFF,0};
+	UPF::supply_net_type mspa17_VDD_AO_obj = '{UPF::OFF,0};
+
+/* Logic for supply_funcs */
+
+	always@(mspa15_VSS_obj) mspa_pack_testO::mspa_supp1_VSS = mspa15_VSS_obj;
+
+	initial $upf_init_signal_spy( "mspa_pack_testO::mspa_supp1_VSS" , "/tb_top/dut/VSS" ,0,-1);
+	always@(mspa16_VDD_PG_obj) mspa_pack_testO::mspa_supp2_VDD_PG = mspa16_VDD_PG_obj;
+
+	initial $upf_init_signal_spy( "mspa_pack_testO::mspa_supp2_VDD_PG" , "/tb_top/dut/VDD_PG" ,0,-1);
+	always@(mspa17_VDD_AO_obj) mspa_pack_testO::mspa_supp3_VDD_AO = mspa17_VDD_AO_obj;
+
+	initial $upf_init_signal_spy( "mspa_pack_testO::mspa_supp3_VDD_AO" , "/tb_top/dut/VDD_AO" ,0,-1);
+
+/* Connections of Port Nets */
+
+	assign mspa8_restore_ctrl_SIG = mspa_pack_testO::mspa18_restore_ctrl_instr;
+	assign mspa7_save_ctrl_SIG = mspa_pack_testO::mspa19_save_ctrl_instr;
+	assign mspa5_iso_ctrl_SIG = mspa_pack_testO::mspa20_iso_ctrl_instr;
+	assign mspa2_pwr_en_SIG = mspa_pack_testO::mspa21_pwr_en_instr;
+	initial $upf_init_signal_spy( "/tb_top/dut/VSS" , "mspa15_VSS_obj" ,0,-1);
+	initial $upf_init_signal_spy( "/tb_top/dut/VDD_PG" , "mspa16_VDD_PG_obj" ,0,-1);
+	initial $upf_init_signal_spy( "/tb_top/dut/VDD_AO" , "mspa17_VDD_AO_obj" ,0,-1);
+
+/* Supply Sets */
+	mspa_pack_testO::upf_supply_set_type supply_19;
+	mspa_pack_testO::upf_supply_set_type internal_supply_set_17;
+	mspa_pack_testO::upf_supply_set_type output_supply_set_16;
+	mspa_pack_testO::upf_supply_set_type input_supply_set_15;
+	mspa_pack_testO::upf_supply_set_type isolation_supply_set_13;
+	mspa_pack_testO::upf_supply_set_type supply_11;
+	mspa_pack_testO::upf_supply_set_type primary_7;
+	mspa_pack_testO::upf_supply_set_type primary_3;
+
+	/* Logic for Supply Set : PD_BLOCK.RET_BLOCK.supply */
+
+	assign supply_19.power = mspa17_VDD_AO_obj;
+	assign supply_19.ground = mspa15_VSS_obj;
+	assign supply_19.currSimstate = UPF::get_supply_on_state(mspa17_VDD_AO_obj) && UPF::get_supply_on_state(mspa15_VSS_obj) ? NORMAL : CORRUPT;
+
+	/* Logic for Supply Set : PD_BLOCK.LS_BLOCK.internal_supply_set */
+
+	assign internal_supply_set_17.power = anonSN21_internal_supply_set_power;
+	assign internal_supply_set_17.ground = anonSN20_internal_supply_set_ground;
+	assign internal_supply_set_17.currSimstate = UPF::get_supply_on_state(anonSN21_internal_supply_set_power) && UPF::get_supply_on_state(anonSN20_internal_supply_set_ground) ? NORMAL : CORRUPT;
+
+	/* Logic for Supply Set : PD_BLOCK.LS_BLOCK.output_supply_set */
+
+	assign output_supply_set_16.power = anonSN19_output_supply_set_power;
+	assign output_supply_set_16.ground = anonSN18_output_supply_set_ground;
+	assign output_supply_set_16.currSimstate = UPF::get_supply_on_state(anonSN19_output_supply_set_power) && UPF::get_supply_on_state(anonSN18_output_supply_set_ground) ? NORMAL : CORRUPT;
+
+	/* Logic for Supply Set : PD_BLOCK.LS_BLOCK.input_supply_set */
+
+	assign input_supply_set_15.power = anonSN17_input_supply_set_power;
+	assign input_supply_set_15.ground = anonSN16_input_supply_set_ground;
+	assign input_supply_set_15.currSimstate = UPF::get_supply_on_state(anonSN17_input_supply_set_power) && UPF::get_supply_on_state(anonSN16_input_supply_set_ground) ? NORMAL : CORRUPT;
+
+	/* Logic for Supply Set : PD_BLOCK.ISO_BLOCK.isolation_supply_set */
+
+	assign isolation_supply_set_13.power = mspa17_VDD_AO_obj;
+	assign isolation_supply_set_13.ground = mspa15_VSS_obj;
+	assign isolation_supply_set_13.currSimstate = UPF::get_supply_on_state(mspa17_VDD_AO_obj) && UPF::get_supply_on_state(mspa15_VSS_obj) ? NORMAL : CORRUPT;
+
+	/* Logic for Supply Set : PS_BLOCK.supply */
+
+	assign supply_11.power = anonSN13_supply_power;
+	assign supply_11.ground = anonSN12_supply_ground;
+	assign supply_11.currSimstate = UPF::get_supply_on_state(anonSN13_supply_power) && UPF::get_supply_on_state(anonSN12_supply_ground) ? NORMAL : CORRUPT;
+
+	/* Logic for Supply Set : PD_BLOCK.primary */
+
+	assign primary_7.power = mspa14_vout_obj;
+	assign primary_7.ground = mspa15_VSS_obj;
+	assign primary_7.currSimstate = UPF::get_supply_on_state(mspa14_vout_obj) && UPF::get_supply_on_state(mspa15_VSS_obj) ? NORMAL : CORRUPT;
+
+	/* Logic for Supply Set : PD_TOP.primary */
+
+	assign primary_3.power = mspa17_VDD_AO_obj;
+	assign primary_3.ground = mspa15_VSS_obj;
+	assign primary_3.currSimstate = UPF::get_supply_on_state(mspa17_VDD_AO_obj) && UPF::get_supply_on_state(mspa15_VSS_obj) ? NORMAL : CORRUPT;
+
+/* Power Switches */
+
+	/* Logic for Power Switch : /tb_top/dut/PS_BLOCK */
+
+	state switch_state_10; /* Current switch state */
+	mspa_pack_testO::state_enum psw_state_10; /* Current user defined switch state */
+
+	mspa_generic_power_switch_model_testO
+	 #(.NUM_INPUT_PORTS(1),
+	   .NUM_CTRL_PORTS(1),
+	   .NUM_ON_STATES(1),
+	   .NUM_P_ON_STATES(0),
+	   .NUM_OFF_STATES(1),
+	   .NUM_ERR_STATES(0),
+	   .EN_DELAY(0))
+	mspa36_power_switch_PS_BLOCK_testO
+	 ( .in_ports({ mspa17_VDD_AO_obj }),
+	   .ctrl_ports({ mspa2_pwr_en_SIG }),
+	   .on_states({ 1'(mspa2_pwr_en_SIG) }),
+	   .on_states_enums({ mspa_pack_testO::on_state }),
+	   .on_states_inputs({ mspa17_VDD_AO_obj }),
+	   .on_states_out_volts({ -1 }),
+	   .p_on_states(),
+	   .p_on_states_enums(),
+	   .p_on_states_inputs(),
+	   .p_on_states_out_volts(),
+	   .off_states({ 1'((!(mspa2_pwr_en_SIG))) }),
+	   .off_states_enums({ mspa_pack_testO::off_state }),
+	   .error_states(),
+	   .error_states_enums(),
+	   .delay(0),
+	   .pwr_sig(1'b1),
+	   .sw_name("PS_BLOCK"),
+	   .out_name("vout"),
+	   .sw_out_port(mspa14_vout_obj),
+	   .switch_state(switch_state_10),
+	   .psw_state_enum(psw_state_10)
+	 );
+
+
+/* Power Domains */
+
+	/* Logic for Power Domain : /tb_top/dut/PD_BLOCK */
+
+	assign mspa_pack_testO::PA_PWR_ARR[6] = get_supply_on_state( mspa14_vout_obj ) && get_supply_on_state( mspa15_VSS_obj );
+	power_state_simstate simMode_6;
+	assign simMode_6 = mspa_pack_testO::PA_PWR_ARR[6] ? NORMAL : CORRUPT;
+	always@(simMode_6 or mspa_pack_testO::PA_PWR_ARR[6])
+	begin
+		if(mspa_pack_testO::paopt_t0cond)
+			mspa_pack_testO::PA_PWR_INSTR_SIM_NORM_ARR[6] = (simMode_6 == NORMAL);
+		else
+			#0 mspa_pack_testO::PA_PWR_INSTR_SIM_NORM_ARR[6] = (simMode_6 == NORMAL);
+	end
+	mspa_pack_testO::def_upf_supply_set_type primary_6;
+	assign primary_6.power = mspa14_vout_obj;
+	assign primary_6.ground = mspa15_VSS_obj;
+	assign primary_6.currSimstate = simMode_6;
+
+	/* Logic for Power Domain : /tb_top/dut/PD_TOP */
+
+	assign mspa_pack_testO::PA_PWR_ARR[2] = get_supply_on_state( mspa17_VDD_AO_obj ) && get_supply_on_state( mspa15_VSS_obj );
+	power_state_simstate simMode_2;
+	assign simMode_2 = mspa_pack_testO::PA_PWR_ARR[2] ? NORMAL : CORRUPT;
+	always@(simMode_2 or mspa_pack_testO::PA_PWR_ARR[2])
+	begin
+		if(mspa_pack_testO::paopt_t0cond)
+			mspa_pack_testO::PA_PWR_INSTR_SIM_NORM_ARR[2] = (simMode_2 == NORMAL);
+		else
+			#0 mspa_pack_testO::PA_PWR_INSTR_SIM_NORM_ARR[2] = (simMode_2 == NORMAL);
+	end
+	mspa_pack_testO::def_upf_supply_set_type primary_2;
+	assign primary_2.power = mspa17_VDD_AO_obj;
+	assign primary_2.ground = mspa15_VSS_obj;
+	assign primary_2.currSimstate = simMode_2;
+
+/* Composite Domains */
+
+/* Power Groups */
+
+/* Retention Cells */
+
+	/* Logic for Retention Cell : /tb_top/dut/PD_BLOCK.RET_BLOCK */
+
+	assign mspa_pack_testO::PA_PWR_ARR[18] = get_supply_on_state( mspa17_VDD_AO_obj ) && get_supply_on_state( mspa15_VSS_obj );
+	assign mspa_pack_testO::PA_RC_INST_PWR_ARR[18] = mspa_pack_testO::PA_PWR_ARR[18] && mspa_pack_testO::PA_PWR_ARR[6];
+	assign mspa_pack_testO::PA_SAVE_ARR[18] = (mspa7_save_ctrl_SIG === 1'b1);
+	assign mspa_pack_testO::PA_RESTORE_ARR[18] = (mspa8_restore_ctrl_SIG === 1'b1);
+	reg RET_BLOCK_TEMP_RD_18 = 1'b0;
+
+	always @(negedge mspa_pack_testO::PA_RESTORE_ARR[18]) begin
+		if(mspa_pack_testO::paopt_t0cond) begin
+			mspa_pack_testO::PA_RESTORE_RD_INSTR_ARR[18] = 1'b1;
+		end
+	end
+
+	always @(posedge mspa_pack_testO::PA_RESTORE_RD_INSTR_ARR[18]) begin
+		RET_BLOCK_TEMP_RD_18 = 1'b1;
+	end
+
+	always @(posedge RET_BLOCK_TEMP_RD_18 ) begin
+		mspa_pack_testO::PA_RESTORE_RD_INSTR_ARR[18] = 1'b0;
+		RET_BLOCK_TEMP_RD_18 = 1'b0;
+	end
+
+	bl_edge_model_testO upf_ret_inst_mspa44_ret_strategy_RET_BLOCK_testO (mspa_pack_testO::PA_SAVE_ARR[18], 1'b1, mspa_pack_testO::PA_RESTORE_ARR[18], 1'b1, 1'b1, mspa_pack_testO::PA_PWR_ARR[6], mspa_pack_testO::PA_PWR_ARR[18], 1'b1, 1'b1, {mspa_pack_testO::PA_RET_EVENT_ARR_BIT7[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT6[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT5[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT4[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT3[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT2[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT1[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT0[18]});
+
+	power_state_simstate simMode_18;
+	assign simMode_18 = mspa_pack_testO::PA_PWR_ARR[18] ? NORMAL : CORRUPT;
+	mspa_retention_info_model RET_BLOCK_18
+	(   .saveSignal(mspa7_save_ctrl_SIG)
+	  , .restoreSignal(mspa8_restore_ctrl_SIG)
+	  , .rtcCond()
+	  , .saveCond()
+	  , .restoreCond()
+	  , .retPwr(mspa_pack_testO::PA_RC_INST_PWR_ARR[18])
+	);
+
+
+/* Isolation Cells */
+
+	/* Logic for Isolation Cell : /tb_top/dut/PD_BLOCK.ISO_BLOCK */
+
+	assign mspa_pack_testO::PA_PWR_ARR[12] = get_supply_on_state(mspa17_VDD_AO_obj) && get_supply_on_state(mspa15_VSS_obj) ;
+	assign mspa_pack_testO::PA_ISO_ENABLE_ARR[12] = mspa5_iso_ctrl_SIG;
+	power_state_simstate simMode_12;
+	assign simMode_12 = mspa_pack_testO::PA_PWR_ARR[12] ? NORMAL : CORRUPT;
+
+/* Level Shiters */
+
+/* Repeaters */
+
+/* PA tree debug/checks dumping info */
+	assign mspa_pack_testO::mspa36_power_switch_PS_BLOCK_testO_dut_qpaupfScope1_testO_switch = psw_state_10;
+	assign mspa_pack_testO::pd_upf_supply_set_type_ARR[6].simMode = simMode_6;
+	assign mspa_pack_testO::pd_upf_supply_set_type_ARR[6].primary = primary_6;
+	assign mspa_pack_testO::pd_upf_supply_set_type_ARR[2].simMode = simMode_2;
+	assign mspa_pack_testO::pd_upf_supply_set_type_ARR[2].primary = primary_2;
+
+/* Pack sigs for roots */
+	assign mspa_pack_testO::mspa26_VDD_AO_instr = mspa17_VDD_AO_obj;
+	assign mspa_pack_testO::mspa25_vout_instr = mspa14_vout_obj;
+	assign mspa_pack_testO::mspa27_pwr_en_instr = mspa2_pwr_en_SIG;
+
+/* Implicit Pds */
+
+/* IMDB mirror sigs */
+
+/* Equivalence supply checks */
+
+endmodule
+
+module upf_debug_top_testO;
+	import UPF::*;
+	qpa_flat_mod_testO qpa_flat_mod();
+
+endmodule
+
+
+//Vlog package signals
+	`line 1 "pa_reports/pa_substitute.txt" 1
+module qpa_debug_pack_testO();
+import UPF::*;
+reg paopt_t0cond;
+wire mspa27_pwr_en_instr;
+supply_net_type mspa26_VDD_AO_instr;
+mspa_pack_testO::state_enum mspa36_power_switch_PS_BLOCK_testO_dut_qpaupfScope1_testO_switch;
+supply_net_type mspa25_vout_instr;
+wire mspa21_pwr_en_instr;
+wire mspa20_iso_ctrl_instr;
+wire mspa19_save_ctrl_instr;
+wire mspa18_restore_ctrl_instr;
+supply_net_type mspa_supp3_VDD_AO;
+supply_net_type mspa_supp2_VDD_PG;
+supply_net_type mspa_supp1_VSS;
+reg mspa9_implicit_pd_top_level_DOMAIN_PWR;
+reg [20:0] PA_PWR_ARR;
+reg [20:0] PA_PWR_INSTR_ARR;
+wire [20:0] PA_PWR_INSTR_WIRE_ARR;
+reg [20:0] PA_PWR_INSTR_SIM_NORM_ARR;
+reg [20:0] PA_SAVE_ARR;
+reg [20:0] PA_SAVE_INSTR_ARR;
+reg [20:0] PA_RESTORE_ARR;
+reg [20:0] PA_RESTORE_INSTR_ARR;
+reg [20:0] PA_RESTORE_RD_INSTR_ARR;
+reg [20:0] PA_RC_INST_PWR_ARR;
+reg [20:0] PA_RC_INST_PWR_INSTR_ARR;
+wire [20:0] PA_RC_INST_PWR_INSTR_WIRE_ARR;
+reg [20:0] PA_RET_EVENT_ARR_BIT7,PA_RET_EVENT_ARR_BIT6,PA_RET_EVENT_ARR_BIT5,PA_RET_EVENT_ARR_BIT4,PA_RET_EVENT_ARR_BIT3,PA_RET_EVENT_ARR_BIT2,PA_RET_EVENT_ARR_BIT1,PA_RET_EVENT_ARR_BIT0;
+wire [20:0] PA_RET_PWR_INSTR_ARR;
+reg [20:0] PA_ISO_ENABLE_ARR;
+wire [20:0]PA_CS_W;//Signal used for power up
+bit [20:0]PA_RCS_W;//Signal used for ret power up
+
+`protect
+assign paopt_t0cond = mspa_pack_testO::paopt_t0cond;
+assign mspa27_pwr_en_instr = mspa_pack_testO::mspa27_pwr_en_instr;
+assign mspa26_VDD_AO_instr = mspa_pack_testO::mspa26_VDD_AO_instr;
+assign mspa36_power_switch_PS_BLOCK_testO_dut_qpaupfScope1_testO_switch = mspa_pack_testO::mspa36_power_switch_PS_BLOCK_testO_dut_qpaupfScope1_testO_switch;
+assign mspa25_vout_instr = mspa_pack_testO::mspa25_vout_instr;
+assign mspa21_pwr_en_instr = mspa_pack_testO::mspa21_pwr_en_instr;
+assign mspa20_iso_ctrl_instr = mspa_pack_testO::mspa20_iso_ctrl_instr;
+assign mspa19_save_ctrl_instr = mspa_pack_testO::mspa19_save_ctrl_instr;
+assign mspa18_restore_ctrl_instr = mspa_pack_testO::mspa18_restore_ctrl_instr;
+assign mspa_supp3_VDD_AO = mspa_pack_testO::mspa_supp3_VDD_AO;
+assign mspa_supp2_VDD_PG = mspa_pack_testO::mspa_supp2_VDD_PG;
+assign mspa_supp1_VSS = mspa_pack_testO::mspa_supp1_VSS;
+assign mspa9_implicit_pd_top_level_DOMAIN_PWR = mspa_pack_testO::mspa9_implicit_pd_top_level_DOMAIN_PWR;
+assign PA_PWR_ARR = mspa_pack_testO::PA_PWR_ARR;
+assign PA_PWR_INSTR_ARR = mspa_pack_testO::PA_PWR_INSTR_ARR;
+assign PA_PWR_INSTR_WIRE_ARR = mspa_pack_testO::PA_PWR_INSTR_WIRE_ARR;
+assign PA_PWR_INSTR_SIM_NORM_ARR = mspa_pack_testO::PA_PWR_INSTR_SIM_NORM_ARR;
+assign PA_SAVE_ARR = mspa_pack_testO::PA_SAVE_ARR;
+assign PA_SAVE_INSTR_ARR = mspa_pack_testO::PA_SAVE_INSTR_ARR;
+assign PA_RESTORE_ARR = mspa_pack_testO::PA_RESTORE_ARR;
+assign PA_RESTORE_INSTR_ARR = mspa_pack_testO::PA_RESTORE_INSTR_ARR;
+assign PA_RESTORE_RD_INSTR_ARR = mspa_pack_testO::PA_RESTORE_RD_INSTR_ARR;
+assign PA_RC_INST_PWR_ARR = mspa_pack_testO::PA_RC_INST_PWR_ARR;
+assign PA_RC_INST_PWR_INSTR_ARR = mspa_pack_testO::PA_RC_INST_PWR_INSTR_ARR;
+assign PA_RC_INST_PWR_INSTR_WIRE_ARR = mspa_pack_testO::PA_RC_INST_PWR_INSTR_WIRE_ARR;
+assign PA_RET_EVENT_ARR_BIT7 = mspa_pack_testO::PA_RET_EVENT_ARR_BIT7;
+assign PA_RET_EVENT_ARR_BIT6 = mspa_pack_testO::PA_RET_EVENT_ARR_BIT6;
+assign PA_RET_EVENT_ARR_BIT5 = mspa_pack_testO::PA_RET_EVENT_ARR_BIT5;
+assign PA_RET_EVENT_ARR_BIT4 = mspa_pack_testO::PA_RET_EVENT_ARR_BIT4;
+assign PA_RET_EVENT_ARR_BIT3 = mspa_pack_testO::PA_RET_EVENT_ARR_BIT3;
+assign PA_RET_EVENT_ARR_BIT2 = mspa_pack_testO::PA_RET_EVENT_ARR_BIT2;
+assign PA_RET_EVENT_ARR_BIT1 = mspa_pack_testO::PA_RET_EVENT_ARR_BIT1;
+assign PA_RET_EVENT_ARR_BIT0 = mspa_pack_testO::PA_RET_EVENT_ARR_BIT0;
+assign PA_RET_PWR_INSTR_ARR = mspa_pack_testO::PA_RET_PWR_INSTR_ARR;
+assign PA_ISO_ENABLE_ARR = mspa_pack_testO::PA_ISO_ENABLE_ARR;
+assign PA_CS_W = mspa_pack_testO::PA_CS_W;
+assign PA_RCS_W = mspa_pack_testO::PA_RCS_W;
+`endprotect
+
+endmodule
+

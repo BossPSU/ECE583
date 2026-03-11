@@ -1,0 +1,542 @@
+`line 2 "mspa_ret_models.v" 1
+
+`mspa_module
+
+`define PA_NO_EVENT                 8'b0_0000_000
+`define PA_STORE_VALUE              8'b0_0000_001
+`define PA_STORE_X                  8'b0_0000_00x
+
+`define PA_RESTORE_VALUE            8'b0_0000_010
+`define PA_CORRUPT_REGISTER         8'b0_0000_100
+`define PA_RELEASE_REGISTER         8'b0_0001_000
+`define PA_SET_REGISTER             8'b0_0010_000
+`define PA_RESET_REGISTER           8'b0_0100_000
+`define PA_RESTORE_HOLD_REGISTER    8'b0_1000_000
+
+
+`define PA_TIME0_EVENT 8'b1_0000_000
+`define PA_MASK 8'b0_1111_110
+`define PA_STORE_MASK 8'b0_0000_001
+
+/*Balloon latch configuration for level sensitive dual controls */
+
+module bl_level_model_testO (
+  SAVE, SC, RESTORE, RC, RTC, PWR, RETPWR, BIAS_TRIGGER, RET_SUP_COR, SAV_RES_COR, 
+  PA_EVENT
+  );
+
+
+  input SAVE;
+  input SC;
+  input RESTORE;
+  input RC;
+  input RTC;
+  input PWR;
+  input RETPWR;
+  input BIAS_TRIGGER;
+  input RET_SUP_COR;
+  input SAV_RES_COR;
+  output [7:0] PA_EVENT;
+  reg [7:0] PA_EVENT;
+  
+  wire RETPWR_RES = RET_SUP_COR ? RETPWR : 1'b1;
+
+  reg restore_event = 1'b0;
+  reg save_event = 1'b0;
+  reg save_edge = 1'b0;
+  reg save_end = 1'b0;
+  reg resave = 1'b0;
+  integer time_stamp = 0;
+  reg time_zero_trigger = 1'b0;
+
+  reg time0_ret_event_mask = 1'b0;
+
+  (*UPF_PA_OBJ = "TRUE"*) always @(posedge time_zero_trigger) begin
+    time0_ret_event_mask = 1'b1;
+    if(RETPWR_RES === 1'bx || RETPWR_RES === 1'b0) begin
+        PA_EVENT = `PA_CORRUPT_REGISTER | `PA_TIME0_EVENT;
+    end else if (SAV_RES_COR && RESTORE === 1'b1 && SAVE === 1'b1 && SC === 1'b1 && RC === 1'b1) begin
+        PA_EVENT = `PA_CORRUPT_REGISTER | `PA_TIME0_EVENT;
+    end
+  end
+
+
+  initial begin
+    PA_EVENT = `PA_NO_EVENT;
+    time_zero_trigger = 1'b1;
+  end
+
+
+ /* Not making SC or RC part of sensitivity list because they should be evaluated when there is an activity on save/restore sig */
+  always @(PWR or RETPWR or RESTORE or negedge RTC or posedge SAVE) begin: restore_process
+
+  if (time0_ret_event_mask) begin 
+      if (!RETPWR_RES) begin
+          PA_EVENT = `PA_CORRUPT_REGISTER | `PA_STORE_X;
+      end else if (!RETPWR && RESTORE) begin
+          PA_EVENT = `PA_CORRUPT_REGISTER | `PA_STORE_X;
+      end else if (SAV_RES_COR && SAVE && RESTORE && SC && RC) begin
+          PA_EVENT = `PA_CORRUPT_REGISTER | `PA_STORE_X;
+      end else if (!RETPWR) begin
+          PA_EVENT = `PA_STORE_X;
+      end else if (!PWR && !RTC) begin
+          PA_EVENT = `PA_STORE_X;
+      end else if (!PWR) begin
+          PA_EVENT = `PA_NO_EVENT;
+      end else if (RESTORE) begin
+          PA_EVENT = (PA_EVENT & `PA_STORE_VALUE) | `PA_RESTORE_HOLD_REGISTER;
+          /*if PA_EVENT[0] is not 'x' then preserve it otherwise make it 0*/;
+          /*because by masking with PA_STORE_VALUE we are removing store_x bit;*/
+      if (PA_EVENT[0] === 1'bx) PA_EVENT[0] = 1'b0; 
+      end else begin
+          if(PA_EVENT & `PA_MASK)
+             PA_EVENT = `PA_RELEASE_REGISTER;
+      end
+  end
+
+  end:restore_process
+
+  always @(posedge PWR) begin
+     if (RESTORE && PWR && RETPWR_RES) begin
+         time_stamp = $time;
+     end
+  end
+ 
+  always @(posedge RC) begin
+     if (RESTORE && PWR && RETPWR_RES) begin
+     if (time_stamp == $time)
+          PA_EVENT = (PA_EVENT & `PA_STORE_MASK) | `PA_RESTORE_HOLD_REGISTER;
+     end
+  end
+  // To capture Proper Restore Event for Coverage purpose : if PA_RESTORE_HOLD_REGISTER @ negedge of RS => proper restore 
+  /* negedge SAVE because of level sensitive behavior. Cant make this process sensitive to q hence 
+  need to take special care and trigger the store_value at trailing edge of level sensitive signal as defined in lrm. */
+  always @(negedge SAVE) begin:save_process
+  if (time0_ret_event_mask) begin 
+      if (RETPWR && PWR) begin
+          if (SC) begin 
+              if (PA_EVENT & `PA_STORE_MASK & `PA_STORE_VALUE) begin 
+                  PA_EVENT = (PA_EVENT & `PA_MASK) | `PA_NO_EVENT;
+                  resave = 1'b1;
+              end else begin
+                  PA_EVENT = (PA_EVENT & `PA_MASK) | `PA_STORE_VALUE;
+              end
+              /* To capture Proper Save Event for Coverage purpose */
+              save_edge = 1'b1;
+          end
+      end else begin
+          PA_EVENT = (PA_EVENT & `PA_MASK) | `PA_STORE_X;
+      end 
+  end 
+  end:save_process
+
+  always @(posedge resave) begin
+      PA_EVENT = (PA_EVENT & `PA_MASK) | `PA_STORE_VALUE;
+      resave = 1'b0; 
+  end
+  always @(posedge save_edge) begin
+      save_end = 1'b1; 
+  end
+  always @(posedge save_end) begin
+      PA_EVENT = (PA_EVENT & `PA_MASK);
+      save_end = 1'b0; 
+      save_edge = 1'b0; 
+  end
+  always @(negedge PA_EVENT[6]) begin
+     if (time0_ret_event_mask) begin 
+         if (PWR && RETPWR_RES) begin
+             restore_event <= 1'b1;
+         end
+     end
+  end 
+
+  always @(negedge SAVE) begin
+  if (time0_ret_event_mask) begin 
+      if (RETPWR && PWR & SC) begin
+              save_event <= 1'b1;
+      end 
+  end 
+  end
+
+  always @(posedge save_event) begin
+      save_event <= 1'b0; 
+  end
+  always @(posedge restore_event) begin
+      restore_event <= 1'b0; 
+  end
+
+endmodule
+
+ 
+/*Balloon latch configuration for edge sensitive controls */
+module bl_edge_model_testO (
+  SAVE, SC, RESTORE, RC, RTC, PWR, RETPWR, BIAS_TRIGGER, RET_SUP_COR, PA_EVENT
+  );
+
+  input SAVE;
+  input SC;
+  input RESTORE;
+  input RC;
+  input RTC;
+  input PWR;
+  input RET_SUP_COR;
+  input RETPWR;
+  input BIAS_TRIGGER;
+
+  output reg [7:0] PA_EVENT;
+
+
+
+  wire RETPWR_RES = RET_SUP_COR ? RETPWR : 1'b1;
+
+
+  reg release_up = 1'b0;
+  reg restore_event = 1'b0;
+  reg save_event = 1'b0;
+  reg restore_edge = 1'b0;
+  reg restore_end = 1'b0;
+  reg save_edge = 1'b0;
+  reg save_end = 1'b0;
+  reg time_zero_trigger = 1'b0;
+  reg time0_ret_event_mask = 1'b0;
+
+  (*UPF_PA_OBJ = "TRUE"*) always @(posedge time_zero_trigger) begin
+    time0_ret_event_mask = 1'b1;
+    if(RETPWR_RES === 1'bx || RETPWR_RES === 1'b0) begin
+      PA_EVENT = `PA_CORRUPT_REGISTER | `PA_TIME0_EVENT;
+    end
+  end
+
+
+  initial begin
+    PA_EVENT = `PA_NO_EVENT;
+    time_zero_trigger = 1'b1;
+  end
+
+
+  always @(BIAS_TRIGGER) begin
+  if (time0_ret_event_mask) begin 
+      if (PWR && RETPWR_RES) begin
+         if( PA_EVENT & `PA_RELEASE_REGISTER) begin 
+           PA_EVENT = `PA_NO_EVENT;
+           release_up = ~release_up;
+         end else
+           PA_EVENT = `PA_RELEASE_REGISTER;
+      end
+    end
+  end
+ 
+  always @(PWR or RETPWR or negedge RTC) begin: pwr_down_proc
+  if (time0_ret_event_mask) begin
+      if (!RETPWR_RES) begin
+          PA_EVENT = `PA_CORRUPT_REGISTER | `PA_STORE_X;
+      end else if (!PWR && !RTC) begin
+          PA_EVENT = `PA_STORE_X;
+      end else if (!RETPWR) begin
+          PA_EVENT = `PA_STORE_X;
+      end else if (!PWR) begin
+          PA_EVENT = `PA_NO_EVENT;
+      end else begin
+          if(PA_EVENT & `PA_MASK)
+             PA_EVENT = `PA_RELEASE_REGISTER;
+      end
+  end
+  end: pwr_down_proc
+
+  always @(posedge RESTORE) begin: restore_proc
+  if (time0_ret_event_mask) begin
+      if (PWR && RETPWR_RES && RESTORE && RC) begin
+          PA_EVENT = (PA_EVENT & `PA_STORE_MASK) | `PA_RESTORE_VALUE;
+          restore_edge = 1'b1;
+      end
+  end
+  end: restore_proc
+
+
+  always @(posedge SAVE) begin: save_proc
+  if (time0_ret_event_mask) begin
+      if (SAVE && SC) begin
+          if (RETPWR && PWR) begin
+              PA_EVENT = (PA_EVENT & `PA_MASK) | `PA_STORE_VALUE;
+              save_edge = 1'b1;
+              /* To account for back to back same events */ 
+          end else begin
+              PA_EVENT = (PA_EVENT & `PA_MASK) | `PA_STORE_X;
+          end
+      end
+  end
+  end: save_proc 
+ 
+  always @(release_up) begin
+    if( !PA_EVENT )
+      PA_EVENT = `PA_RELEASE_REGISTER;
+  end
+  always @(posedge restore_edge) begin
+      restore_end = 1'b1; 
+  end
+  always @(posedge restore_end) begin
+      PA_EVENT = `PA_NO_EVENT;
+      restore_end = 1'b0; 
+      restore_edge = 1'b0; 
+  end
+  always @(posedge save_edge ) begin
+      save_end = 1'b1; 
+  end
+  always @(posedge save_end) begin
+      PA_EVENT = (PA_EVENT & `PA_MASK);
+      save_end = 1'b0; 
+      save_edge = 1'b0; 
+  end
+ 
+  always @(posedge RESTORE) begin
+  if (time0_ret_event_mask) begin
+      if (PWR && RETPWR_RES && RESTORE && RC) begin
+          restore_event <= 1'b1;
+      end
+  end
+  end
+
+
+  always @(posedge SAVE) begin
+  if (time0_ret_event_mask) begin
+      if (SAVE && SC && RETPWR && PWR) begin
+            save_event <= 1'b1;
+      end
+  end
+  end
+ 
+  always @(posedge save_event) begin
+      save_event <= 1'b0; 
+  end
+  always @(posedge restore_event) begin
+      restore_event <= 1'b0; 
+  end
+endmodule 
+ 
+/*Master slave configuration */
+module ms_level_model_testO (
+  RTC, PWR, RETPWR, BIAS_TRIGGER, RET_SUP_COR, 
+  PA_EVENT
+  );
+
+  input RTC;
+  input PWR;
+  input RETPWR;
+  input BIAS_TRIGGER;
+  input RET_SUP_COR;
+  output reg [7:0] PA_EVENT;
+  
+
+  wire RETPWR_RES = RET_SUP_COR ? RETPWR : 1'b1;
+  reg release_up = 1'b0;
+  reg save_edge = 1'b0;
+  reg save_end = 1'b0;
+  reg restore_event = 1'b0;
+  reg save_event = 1'b0;
+  reg time_zero_trigger = 1'b0;
+  reg time0_ret_event_mask = 1'b0;
+
+  (*UPF_PA_OBJ = "TRUE"*) always @(posedge time_zero_trigger) begin
+    time0_ret_event_mask = 1'b1;
+    if(RETPWR_RES === 1'bx || RETPWR_RES === 1'b0) begin
+        PA_EVENT = `PA_CORRUPT_REGISTER | `PA_TIME0_EVENT;
+    end
+  end
+
+
+  initial begin
+    PA_EVENT = `PA_NO_EVENT;
+    time_zero_trigger = 1'b1;
+  end
+
+  always @(BIAS_TRIGGER) begin
+  if (time0_ret_event_mask) begin 
+      if (PWR && RETPWR_RES) begin
+         if( PA_EVENT & `PA_RELEASE_REGISTER) begin 
+           PA_EVENT = `PA_NO_EVENT;
+           release_up = ~release_up;
+         end else
+           PA_EVENT = `PA_RELEASE_REGISTER;
+      end
+    end
+  end
+ 
+always @(PWR or RETPWR or negedge RTC) begin
+if (time0_ret_event_mask) begin
+    if (!RETPWR_RES) begin
+        PA_EVENT = `PA_STORE_X | `PA_CORRUPT_REGISTER;
+    end else if (!RETPWR && RTC) begin
+        PA_EVENT = `PA_STORE_X | `PA_CORRUPT_REGISTER;
+    end else if (!RETPWR) begin
+        PA_EVENT = `PA_STORE_X;
+    end else if (!PWR && !RTC) begin
+        PA_EVENT = `PA_STORE_X;
+    end else if (!PWR) begin
+        PA_EVENT = `PA_NO_EVENT;
+    end else if (RTC) begin
+        PA_EVENT = (PA_EVENT & `PA_STORE_VALUE) | `PA_RESTORE_HOLD_REGISTER;
+          /*if PA_EVENT[0] is not 'x' then preserve it otherwise make it 0*/;
+          /*because by masking with PA_STORE_VALUE we are removing store_x bit;*/
+      if (PA_EVENT[0] === 1'bx) PA_EVENT[0] = 1'b0; 
+    end else begin
+        if(PA_EVENT & `PA_MASK)
+          PA_EVENT = `PA_RELEASE_REGISTER;
+    end
+end
+end
+
+always @(posedge RTC) begin
+  if (time0_ret_event_mask) begin 
+      if(!RETPWR) begin
+        PA_EVENT = `PA_STORE_X | `PA_CORRUPT_REGISTER;
+      end else if(!PWR) begin
+        PA_EVENT = (PA_EVENT & `PA_MASK) | `PA_STORE_X;
+      end else begin
+        PA_EVENT = (PA_EVENT & `PA_MASK) | `PA_STORE_VALUE;
+        save_edge = 1'b1;
+      end
+  end
+end
+
+  always @(release_up) begin
+    if( !PA_EVENT )
+      PA_EVENT = `PA_RELEASE_REGISTER;
+  end
+always @(posedge save_edge) begin
+    PA_EVENT = (PA_EVENT & `PA_STORE_MASK) | `PA_RESTORE_HOLD_REGISTER;
+    save_end = 1'b1;
+end
+always @(posedge save_end) begin
+    PA_EVENT = (PA_EVENT & `PA_MASK);
+    save_end = 1'b0;
+    save_edge = 1'b0;
+end
+
+always @(posedge RTC) begin
+  if (time0_ret_event_mask) begin 
+      if (PWR && RETPWR) begin
+        save_event <= 1'b1;
+      end
+  end
+end
+
+always @(negedge RTC) begin
+  if (time0_ret_event_mask) begin 
+    if (PWR && RETPWR_RES) begin
+      restore_event <= 1'b1;
+    end
+  end
+end
+
+  always @(posedge save_event) begin
+      save_event <= 1'b0; 
+  end
+  always @(posedge restore_event) begin
+      restore_event <= 1'b0; 
+  end
+
+endmodule
+/* First level pa_event handler */ 
+module PA_EVENT_MODIFIER (MS_CONFIG, SET, RESET, CLK, SC, RC, RTC, PA_EVENT_IN, PA_EVENT_OUT);
+  input [7:0] PA_EVENT_IN;
+  input MS_CONFIG, SET, RESET, CLK, SC, RC, RTC;
+  output reg [7:0] PA_EVENT_OUT;
+
+  bit prcs_src_signal;
+  always @(PA_EVENT_IN or posedge prcs_src_signal or negedge SC or negedge RC or negedge RTC) begin
+      if ( prcs_src_signal )  begin
+          PA_EVENT_OUT = `PA_CORRUPT_REGISTER | `PA_STORE_X;
+      end else if ((PA_EVENT_IN & `PA_RELEASE_REGISTER)
+                     || (MS_CONFIG && !RTC && (PA_EVENT_IN & `PA_RESTORE_HOLD_REGISTER)))  begin
+          if (RESET)  begin
+              PA_EVENT_OUT = (PA_EVENT_IN & `PA_STORE_MASK) | `PA_RELEASE_REGISTER | `PA_RESET_REGISTER;
+          end else if (SET)  begin
+              PA_EVENT_OUT = (PA_EVENT_IN & `PA_STORE_MASK) | `PA_RELEASE_REGISTER | `PA_SET_REGISTER;
+          end else if (MS_CONFIG && !RTC && (PA_EVENT_IN & `PA_RESTORE_HOLD_REGISTER))  begin
+              //false restore hold in novopt flow
+              PA_EVENT_OUT = (PA_EVENT_IN & `PA_STORE_MASK) | `PA_RELEASE_REGISTER;
+          end else begin
+              PA_EVENT_OUT = PA_EVENT_IN;
+          end
+      end else if (((PA_EVENT_IN & (`PA_CORRUPT_REGISTER)) != `PA_NO_EVENT)  && !RTC)  begin
+              PA_EVENT_OUT = (PA_EVENT_IN & `PA_MASK) | `PA_STORE_X ;
+      end else begin
+              PA_EVENT_OUT = PA_EVENT_IN;
+      end
+
+      if (MS_CONFIG && (PA_EVENT_IN & `PA_STORE_VALUE) && !RTC) begin
+              PA_EVENT_OUT = (PA_EVENT_IN & `PA_MASK) | `PA_STORE_X ;
+      end
+
+      if (!RC) begin
+              PA_EVENT_OUT &= (~(`PA_RESTORE_VALUE) & ~(`PA_RESTORE_HOLD_REGISTER));
+      end
+      if (!SC) begin
+              PA_EVENT_OUT &= ~(`PA_STORE_VALUE);
+      end
+  end
+endmodule
+/* vsim readable pa_event generator */ 
+module PA_EVENT_PROCESSOR (PWR_FROM_BIAS, PA_EVENT, PWR_DOMAIN);
+
+  input [7:0] PA_EVENT;
+  input PWR_FROM_BIAS;
+  input PWR_DOMAIN;
+  event pa_store_value;
+  event pa_store_x;
+  event pa_restore_value;
+  event pa_corrupt_register;
+  event pa_release_register;
+  event pa_restore_hold_register;
+  event pa_set_register;
+  event pa_reset_register;
+
+  always @(PA_EVENT[0]) begin
+    if ((PA_EVENT & `PA_STORE_X) === `PA_STORE_X) begin
+        -> pa_store_x;
+    end
+    if (PA_EVENT & `PA_STORE_VALUE) begin
+        -> pa_store_value;
+    end
+  end
+
+  always @(PA_EVENT[6:1]) begin
+    if (PA_EVENT & `PA_RESTORE_VALUE) begin
+        -> pa_restore_value;
+    end
+    if (PA_EVENT & `PA_CORRUPT_REGISTER) begin
+        -> pa_corrupt_register;
+        //triggered only at time 0 once
+        if (PA_EVENT & `PA_TIME0_EVENT) #0 -> pa_corrupt_register;
+    end
+    if (PA_EVENT & `PA_RESTORE_HOLD_REGISTER) begin
+        -> pa_restore_hold_register;
+    end
+    if (PA_EVENT & `PA_RELEASE_REGISTER) begin
+        if (PA_EVENT & `PA_RESET_REGISTER) begin
+            -> pa_release_register;
+            #0 -> pa_reset_register;
+        end else if (PA_EVENT & `PA_SET_REGISTER) begin
+            -> pa_release_register;
+            #0 -> pa_set_register;
+        end else begin
+            -> pa_release_register;
+        end
+    end
+  end
+
+  /* PWR can also toggle from bias action, taking care of this here in novopt flow */
+  always @(negedge PWR_FROM_BIAS) begin
+    if (PA_EVENT & `PA_CORRUPT_REGISTER) begin
+        -> pa_corrupt_register;
+    end
+  end
+  always @(negedge PWR_DOMAIN) begin
+    -> pa_corrupt_register;
+  end
+  always @(posedge PWR_DOMAIN) begin
+    if (!(PA_EVENT[6:1])) begin
+        -> pa_release_register;
+    end
+  end
+endmodule

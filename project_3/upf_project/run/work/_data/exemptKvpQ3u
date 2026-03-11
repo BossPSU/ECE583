@@ -1,0 +1,17 @@
+library ieee;
+use ieee.std_logic_1164.std_logic;
+use ieee.std_logic_1164.std_ulogic;
+use ieee.std_logic_1164.std_logic_vector;
+use ieee.std_logic_1164.std_ulogic_vector;
+use ieee.std_logic_1164."xor";
+package mspa_packvh_testO is
+signal pa_std_logic_const_0 : STD_LOGIC := '0';
+signal pa_std_logic_const_1 : STD_LOGIC := '1';
+signal pa_std_logic_const_Z : STD_LOGIC := 'Z';
+signal pa_bit_const_0 : BIT := '0';
+signal pa_bit_const_1 : BIT := '1';
+signal pa_upf_simstate_decl : ieee.UPF.power_state_simstate;
+
+end package;
+package body mspa_packvh_testO is
+end package body mspa_packvh_testO;

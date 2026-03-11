@@ -1,0 +1,168 @@
+# //  Questa Sim-64
+# //  Version 2021.3_1 linux_x86_64 Aug 15 2021
+# //
+# //  Copyright 1991-2021 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# do run.do
+# ** Warning: (vlib-34) Library already exists at "work".
+# Errors: 0, Warnings: 1
+# QuestaSim-64 vmap 2021.3_1 Lib Mapping Utility 2021.08 Aug 15 2021
+# vmap work work 
+# Modifying modelsim.ini
+# QuestaSim-64 vlog 2021.3_1 Compiler 2021.08 Aug 15 2021
+# Start time: 19:12:41 on Mar 10,2026
+# vlog -reportprogress 300 -sv -work work ../rtl/block.sv ../rtl/top.sv ../tb/tb_top.sv 
+# -- Compiling module block
+# -- Compiling module top
+# -- Compiling package tb_top_sv_unit
+# -- Importing package mtiUPF.UPF
+# -- Compiling module tb_top
+# ** Warning: ../tb/tb_top.sv(50): (vlog-2240) Treating stand-alone use of function 'supply_on' as an implicit VOID cast.
+# ** Warning: ../tb/tb_top.sv(51): (vlog-2240) Treating stand-alone use of function 'supply_on' as an implicit VOID cast.
+# 
+# Top level modules:
+# 	tb_top
+# End time: 19:12:41 on Mar 10,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 2
+# QuestaSim-64 vopt 2021.3_1 Compiler 2021.08 Aug 15 2021
+# Start time: 19:12:41 on Mar 10,2026
+# vopt -reportprogress 300 -work work "+acc" -pa_enable=highlight+debug tb_top -pa_upf ../upf/design.upf -pa_top /tb_top/dut -pa_lib work -o testO 
+# -- Syntax Checking UPF Files
+# 
+# Top level modules:
+# 	tb_top
+# 
+# Analyzing design...
+# -- Loading module tb_top
+# -- Loading module top
+# -- Loading module block
+# -- Processing UPF File: ../upf/design.upf
+# -- Resolving UPF Supply Network
+# 
+# -- Invoking Power Hierarchy Compilation
+# 
+# Incremental compilation check found no design-units have changed.
+# Optimized design name is testO
+# End time: 19:12:44 on Mar 10,2026, Elapsed time: 0:00:03
+# Errors: 0, Warnings: 0
+# vsim -pa_debugdir padebug -pa work.testO -c -do "
+#          # Save waveforms to VCD for reference
+#          vcd file sim_out.vcd
+#          vcd add -r /tb_top/*
+# 
+#          # Add all signals to wave window (GUI run)
+#          add wave -divider {TB Controls}
+#          add wave /tb_top/clk
+#          add wave /tb_top/rst_n
+#          add wave /tb_top/pwr_en
+#          add wave /tb_top/iso_ctrl
+#          add wave /tb_top/save_ctrl
+#          add wave /tb_top/restore_ctrl
+#          add wave -divider {DUT Output}
+#          add wave /tb_top/out
+#          add wave -divider {Internal}
+#          add wave /tb_top/dut/d_block
+#          add wave /tb_top/dut/u_block/d
+# 
+#          run -all
+# 
+#          vcd flush
+#          
+#      " 
+# Start time: 19:12:45 on Mar 10,2026
+# Loading sv_std.std
+# Loading mtiUPF.UPF(fast)
+# Loading work.mspa_pack_testO(fast)
+# Loading work.tb_top_sv_unit(fast)
+# Loading work.tb_top(fast)
+# Loading work.top(fast)
+# Loading work.block(fast)
+# Loading work.mspa_ls_cell(fast)
+# Loading work.mspa_iso_chk_cell(fast)
+# Loading work.qpa_top(fast)
+# Loading work.PA_EVENT_PROCESSOR(fast)
+# Loading work.upf_iso_cell_model_pwr_testO(fast)
+# Loading work.upf_debug_top_testO(fast)
+# Loading work.qpa_flat_mod_testO(fast)
+# Loading work.mspa_generic_power_switch_model_testO(fast)
+# Loading work.bl_edge_model_testO(fast)
+# Loading work.mspa_retention_info_model(fast)
+# Loading work.qpa_debug_pack_testO(fast)
+# Loading work.CORRUPT_testO(fast)
+# Loading work.qpa_vl_dummy_chk_sig_mod_testO(fast)
+# Initializing Power Aware mode
+# Loading Power Aware UPF Objects
+# 
+#          # Save waveforms to VCD for reference
+#          vcd file sim_out.vcd
+#          vcd add -r /tb_top/*
+# 
+#          # Add all signals to wave window (GUI run)
+#          add wave -divider {TB Controls}
+#          add wave /tb_top/clk
+#          add wave /tb_top/rst_n
+#          add wave /tb_top/pwr_en
+#          add wave /tb_top/iso_ctrl
+#          add wave /tb_top/save_ctrl
+#          add wave /tb_top/restore_ctrl
+#          add wave -divider {DUT Output}
+#          add wave /tb_top/out
+#          add wave -divider {Internal}
+#          add wave /tb_top/dut/d_block
+#          add wave /tb_top/dut/u_block/d
+# 
+#          run -all
+# 
+#          vcd flush
+#          
+#      
+# === UPF Power-Gated Block Simulation Start ===
+# T=0 | pwr_en=x iso=x save=x restore=x | out=x
+# T=10 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=65 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# T=75 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=85 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# T=95 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=105 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# ---- Saving retention state ----
+# T=115 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=120 | pwr_en=1 iso=0 save=1 restore=0 | out=0
+# T=125 | pwr_en=1 iso=0 save=1 restore=0 | out=1
+# ---- PD_BLOCK OFF: isolation active ----
+# T=130 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# T=135 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=140 | pwr_en=1 iso=1 save=0 restore=0 | out=0
+# T=150 | pwr_en=0 iso=1 save=0 restore=0 | out=0
+# ---- PD_BLOCK ON: restore state ----
+# T=260 | pwr_en=1 iso=1 save=0 restore=0 | out=0
+# ---- Triggering Restore Pulse ----
+# T=280 | pwr_en=1 iso=1 save=0 restore=1 | out=0
+# T=290 | pwr_en=1 iso=1 save=0 restore=0 | out=0
+# T=300 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=305 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# T=315 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=325 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# T=335 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=345 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# T=355 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=365 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# T=375 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# T=385 | pwr_en=1 iso=0 save=0 restore=0 | out=1
+# T=395 | pwr_en=1 iso=0 save=0 restore=0 | out=0
+# === Simulation Complete ===
+# ** Note: $finish    : ../tb/tb_top.sv(108)
+#    Time: 400 ns  Iteration: 1  Instance: /tb_top
+# 1
+# Break in Module tb_top at ../tb/tb_top.sv line 108
+# Causality operation skipped due to absence of debug database file
+# End time: 20:02:31 on Mar 10,2026, Elapsed time: 0:49:46
+# Errors: 0, Warnings: 0

@@ -1,0 +1,14 @@
+`line 2 "mspa_dummy_chk_sig_mod_file.sv" 1
+
+`mspa_module
+
+
+
+module qpa_vl_dummy_chk_sig_mod_testO;
+endmodule
+
+
+
+module qpa_vh_chkr_mod_testO #(parameter mode = 1, size = 1) (output wire [size:0] qpa_chkr_port);
+endmodule
+

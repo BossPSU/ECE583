@@ -1,0 +1,125 @@
+# =====================================================================
+# design.upf
+# Unified Power Format (UPF) for Low-Power Design Verification
+#
+# Design:   top / block  (power-gated toggle block)
+# Tool:     Questa PA (ModelSim/QuestaSim with Power Aware)
+#
+# Power Domains:
+#   PD_TOP   - Always-On domain,    supply: VDD_AO = 1.0 V, VSS = 0 V
+#   PD_BLOCK - Switchable domain,   supply: VDD_PG = 0.8 V (power-gated)
+#
+# Features modelled:
+#   * Power switch (header switch) between VDD_AO and VDD_PG
+#   * Isolation cell (clamp-to-0) on PD_BLOCK outputs crossing into PD_TOP
+#   * Level shifter (low-to-high) on the same crossing path
+#   * Retention register inside PD_BLOCK
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# 1. SCOPE
+# ---------------------------------------------------------------------
+set_scope /tb_top/dut
+
+# ---------------------------------------------------------------------
+# 2. SUPPLY PORTS  (abstract supplies visible at this scope level)
+# ---------------------------------------------------------------------
+create_supply_port VDD_AO
+create_supply_port VDD_PG
+create_supply_port VSS
+
+# ---------------------------------------------------------------------
+# 3. SUPPLY NETS
+# ---------------------------------------------------------------------
+# Always-on rail
+create_supply_net VDD_AO
+create_supply_net VSS
+
+# Switched (power-gated) rail
+create_supply_net VDD_PG
+create_supply_net VDD_BLOCK   ;# post-switch net feeding PD_BLOCK
+
+# ---------------------------------------------------------------------
+# 4. CONNECT SUPPLY PORTS TO NETS
+# ---------------------------------------------------------------------
+connect_supply_net VDD_AO  -ports VDD_AO
+connect_supply_net VDD_PG  -ports VDD_PG
+connect_supply_net VSS     -ports VSS
+
+# ---------------------------------------------------------------------
+# 5. POWER DOMAINS
+# ---------------------------------------------------------------------
+# PD_TOP  : always-on; covers the entire top-level scope
+create_power_domain PD_TOP \
+    -include_scope
+
+# PD_BLOCK : power-gated; covers the u_block instance
+create_power_domain PD_BLOCK \
+    -elements {u_block}
+
+# ---------------------------------------------------------------------
+# 6. PRIMARY SUPPLY ASSOCIATIONS
+# ---------------------------------------------------------------------
+set_domain_supply_net PD_TOP   -primary_power_net VDD_AO  -primary_ground_net VSS
+set_domain_supply_net PD_BLOCK -primary_power_net VDD_BLOCK -primary_ground_net VSS
+
+# ---------------------------------------------------------------------
+# 7. POWER SWITCH  (header switch, controlled by pwr_en)
+# ---------------------------------------------------------------------
+# The switch sits between VDD_AO (input) and VDD_BLOCK (output).
+# pwr_en=1  => switch closed, VDD_BLOCK energised
+# pwr_en=0  => switch open,   VDD_BLOCK de-energised
+create_power_switch PS_BLOCK \
+    -domain        PD_BLOCK \
+    -input_supply_port  {vin  VDD_AO} \
+    -output_supply_port {vout VDD_BLOCK} \
+    -control_port  {ctrl pwr_en} \
+    -on_state      {on_state  vin {ctrl}} \
+    -off_state     {off_state     {!ctrl}}
+
+# ---------------------------------------------------------------------
+# 8. ISOLATION STRATEGY
+#    Isolate PD_BLOCK outputs crossing into PD_TOP (d_block -> out)
+#    Isolation cell: clamp output to 0 when iso_ctrl=1
+#    Cell is powered by the always-on domain (PD_TOP / VDD_AO)
+# ---------------------------------------------------------------------
+set_isolation ISO_BLOCK \
+    -domain          PD_BLOCK \
+    -isolation_power_net   VDD_AO \
+    -isolation_ground_net  VSS \
+    -clamp_value     0 \
+    -applies_to      outputs \
+    -isolation_signal    iso_ctrl \
+    -isolation_sense     high \
+    -location        parent
+
+# ---------------------------------------------------------------------
+# 9. LEVEL SHIFTER STRATEGY
+#    Signals cross from PD_BLOCK (0.8 V) to PD_TOP (1.0 V).
+#    A low-to-high level shifter is required on the output path.
+#    The level shifter is co-located with the isolation cell (parent).
+# ---------------------------------------------------------------------
+set_level_shifter LS_BLOCK \
+    -domain          PD_BLOCK \
+    -applies_to      outputs \
+    -rule            low_to_high \
+    -location        parent
+
+# ---------------------------------------------------------------------
+# 10. RETENTION STRATEGY
+#     Retention flip-flop inside PD_BLOCK saves/restores state.
+#     save    triggered by save_ctrl    rising edge (active-high)
+#     restore triggered by restore_ctrl rising edge (active-high)
+#     Retention cell powered by always-on supply (VDD_AO).
+# ---------------------------------------------------------------------
+set_retention RET_BLOCK \
+    -domain          PD_BLOCK \
+    -retention_power_net   VDD_AO \
+    -retention_ground_net  VSS \
+    -save_signal     {save_ctrl    posedge} \
+    -restore_signal  {restore_ctrl posedge}
+
+# =====================================================================
+# End of design.upf
+# =====================================================================
+

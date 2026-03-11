@@ -1,0 +1,482 @@
+/* This package contains the definitions of the functions used in Power Aware Netlist file */
+`line 3 "mspa_pack.sv" 1
+`line 1 "pa_reports/pa_substitute.txt" 1
+package mspa_pack_testO;
+
+reg pa_reg_const_0 = 1'b0;
+reg pa_reg_const_1 = 1'b1;
+UPF::power_state_simstate pa_upf_simstate_decl = UPF::NORMAL;
+UPF::supply_net_type pa_pwr_upf_snet_decl = '{UPF::FULL_ON,1};
+UPF::supply_net_type pa_gnd_upf_snet_decl = '{UPF::FULL_ON,0};
+typedef struct packed {
+	reg Active;
+	integer ps_idx;
+	UPF::power_state_simstate state_simstate;
+} ss_ps_type;
+typedef struct packed {
+	reg Active;
+	integer ps_idx;
+} pd_ps_type;
+
+	/******************************************************* 
+	** Mapping functions corresponding to VCTs            **
+	 *******************************************************/
+
+	// MSPA Function to convert int to simstate 
+	function UPF::power_state_simstate mspa_int_to_simstate( int x );  
+	UPF::power_state_simstate simState;
+	if( x === 0 )
+		simState = UPF::CORRUPT;
+	else if( x === 1 )
+		simState = UPF::CORRUPT_ON_ACTIVITY;
+	else if( x === 2 )
+		simState = UPF::CORRUPT_ON_CHANGE;
+	else if( x === 3 )
+		simState = UPF::CORRUPT_STATE_ON_ACTIVITY;
+	else if( x === 4 )
+		simState = UPF::CORRUPT_STATE_ON_CHANGE;
+	else if( x === 5 )
+		simState = UPF::NORMAL;
+	return simState;
+	endfunction: mspa_int_to_simstate  
+	// MSPA Function to convert simstate to int 
+	function int mspa_simstate_to_int( UPF::power_state_simstate simState );  
+	int x;
+	if( simState === UPF::CORRUPT )
+		x = 0;
+	else if( simState === UPF::CORRUPT_ON_ACTIVITY )
+		x = 1;
+	else if( simState === UPF::CORRUPT_ON_CHANGE)
+		x = 2;
+	else if( simState === UPF::CORRUPT_STATE_ON_ACTIVITY)
+		x = 3;
+	else if( simState === UPF::CORRUPT_STATE_ON_CHANGE)
+		x = 4;
+	else if( simState === UPF::NORMAL)
+		x = 5;
+	return x;
+	endfunction: mspa_simstate_to_int
+/*Function for msg str for iepcoa/idpcoa*/
+function string msg_str_func(UPF::power_state_simstate simState,int isIepCoa);
+if(simState == UPF::CORRUPT)
+	msg_str_func = isIepCoa ? "power is switched OFF" : "power shut OFF";
+else if(simState == UPF::CORRUPT_ON_ACTIVITY)
+	msg_str_func = isIepCoa ? "driving supply is in CORRUPT_ON_ACTIVITY simstate": "driving supply CORRUPT_ON_ACTIVITY simstate";
+else if(simState == UPF::CORRUPT_STATE_ON_ACTIVITY)
+	msg_str_func = isIepCoa ? "driving supply is in CORRUPT_STATE_ON_ACTIVITY simstate": "driving supply CORRUPT_STATE_ON_ACTIVITY simstate";
+else if(simState == UPF::CORRUPT_STATE_ON_CHANGE)
+	msg_str_func = isIepCoa ? "driving supply is in CORRUPT_STATE_ON_CHANGE simstate": "driving supply CORRUPT_STATE_ON_CHANGE simstate";
+else if(simState == UPF::CORRUPT_ON_CHANGE)
+	msg_str_func = isIepCoa ? "driving supply is in CORRUPT_ON_CHANGE simstate": "driving supply CORRUPT_ON_CHANGE simstate";
+endfunction
+
+function int msg_str_func_int(UPF::power_state_simstate simState,int isIepCoa);
+if(simState == UPF::CORRUPT)
+	msg_str_func_int = isIepCoa ? 1 : 2;
+else if(simState == UPF::CORRUPT_ON_ACTIVITY)
+	msg_str_func_int = isIepCoa ? 3 : 4;
+else if(simState == UPF::CORRUPT_STATE_ON_ACTIVITY)
+	msg_str_func_int = isIepCoa ? 5 : 6;
+else if(simState == UPF::CORRUPT_STATE_ON_CHANGE)
+	msg_str_func_int = isIepCoa ? 7 : 8;
+else if(simState == UPF::CORRUPT_ON_CHANGE)
+	msg_str_func_int = isIepCoa ? 9 : 10;
+endfunction
+
+// MSPA Function corresponding to package function supply_on 
+function automatic bit mspa_supply_on( ref UPF::supply_net_type supply_sig, input string pad_name, real value = 1.0, string file_info = "", int line_info = 0, string scope_path = "");
+	int result;
+	value = value * 1000000; //converting volt to uV.
+	supply_sig.voltage = $rtoi(value);
+	supply_sig.state = UPF::FULL_ON;
+	$pa_messagelog("%:S (vsim-%:I) %:C: Time: %s, Supply ON applied on Signal:'%s' , Voltage = %f, File:%:F(%:L)",
+ 							$pa_get_svrt("Note","8962","--"),"8962","QPA_UPF_PACKAGE_FUNC", $pa_pptime, pad_name, UPF::get_supply_voltage(supply_sig), file_info, line_info);
+	result = 1;
+	return result;
+endfunction: mspa_supply_on
+
+// MSPA Function corresponding to package function supply_off 
+function automatic bit mspa_supply_off( ref UPF::supply_net_type supply_sig, input string pad_name, string file_info = "", int line_info = 0, string scope_path = "");
+	int result;
+	supply_sig.voltage = 0;
+	supply_sig.state = UPF::OFF;
+	$pa_messagelog("%:S (vsim-%:I) %:C: Time: %s, Supply OFF applied on Signal:'%s' , File:%:F(%:L)",
+ 							$pa_get_svrt("Note","8962","--"),"8962","QPA_UPF_PACKAGE_FUNC", $pa_pptime, pad_name, file_info, line_info);
+	result = 1;
+	return result;
+endfunction: mspa_supply_off
+
+// MSPA Function corresponding to package function supply_on 
+function automatic bit mspa_supply_partial_on( ref UPF::supply_net_type supply_sig, input string pad_name, real value = 1.0, string file_info = "", int line_info = 0, string scope_path = "");
+	int result;
+	value = value * 1000000; //converting volt to uV.
+	supply_sig.voltage = $rtoi(value);
+	supply_sig.state = UPF::PARTIAL_ON;
+	$pa_messagelog("%:S (vsim-%:I) %:C: Time: %s, Supply PARTIAL_ON applied on Signal:'%s' , Voltage = %f, File:%:F(%:L)",
+ 							$pa_get_svrt("Note","8962","--"),"8962","QPA_UPF_PACKAGE_FUNC", $pa_pptime, pad_name, UPF::get_supply_voltage(supply_sig), file_info, line_info);
+	result = 1;
+	return result;
+endfunction: mspa_supply_partial_on
+
+// MSPA Function corresponding to package function get_supply_value 
+function automatic UPF::supply_net_type mspa_get_supply_value( UPF::supply_net_type supply_sig, input string pad_name, string file_info = "", int line_info = 0, string scope_path = "");
+	return supply_sig;
+endfunction: mspa_get_supply_value
+
+// MSPA Function corresponding to package function set_supply_state 
+function automatic UPF::upfBooleanT mspa_set_supply_state( ref UPF::supply_net_type supply_sig, input UPF::upfStringT object_name, UPF::upfSupplyStateE supply_state, string file_info = "", int line_info = 0, string scope_path = "");
+	UPF::upfBooleanT result;
+	supply_sig.state = supply_state;
+	result = 1;
+	return result;
+endfunction: mspa_set_supply_state
+
+function bit is_same_root_supply_driver (input UPF::supply_net_type net1, input UPF::supply_net_type net2);       
+    if (net1.voltage == net2.voltage)                                      
+        return 1'b1;                                                       
+    else                                                                   
+        return 1'b0;                                                       
+endfunction                                                                
+                                                                           
+function UPF::state get_net_state (input UPF::supply_net_type net);                  
+    return net.state;                                                      
+endfunction                                                                
+function UPF::supply_net_type MSPA_PARALLEL_UPF1 (input UPF::supply_net_type bus[]   
+         ,input string res_net_name = "", input string net_name[] = {});             
+                                                                           
+    automatic int count = 1;                                               
+    automatic int voltage = 0;                                             
+    UPF::supply_net_type on_net;                                           
+    automatic UPF::state state;                                            
+    automatic int error = 0;                                               
+    automatic string str;                                                  
+                                                                           
+    state = bus[0].state;                                                  
+                                                                           
+    foreach(bus[i]) begin                                                  
+        case (bus[i].state)                                                
+            UPF::UNDETERMINED:                                                  
+               begin                                                       
+                   state = UPF::UNDETERMINED;                                   
+               end                                                         
+            UPF::PARTIAL_ON:                                                    
+               begin                                                       
+                   state = (state == UPF::UNDETERMINED) ? UPF::UNDETERMINED : UPF::PARTIAL_ON;   
+               end                                                         
+            UPF::FULL_ON:                                                       
+               begin                                                       
+                   state = (state == UPF::UNDETERMINED) ? UPF::UNDETERMINED : ((state == UPF::FULL_ON) ? UPF::FULL_ON : UPF::PARTIAL_ON )  ;      
+               end                                                         
+            UPF::OFF:                                                           
+               begin                                                       
+                   state = (state == UPF::UNDETERMINED) ? UPF::UNDETERMINED : ((state == UPF::OFF) ? UPF::OFF : UPF::PARTIAL_ON )  ;      
+               end                                                         
+            default : ;                                                    
+         endcase                                                           
+                                                                           
+        if ( bus[i].state != UPF::OFF && bus[i].state != UPF::UNDETERMINED) begin    
+            if (count) begin                                               
+                voltage = bus[i].voltage;                                  
+                on_net = bus[i];                                           
+                count = 0;                                                 
+            end                                                            
+            else if (!is_same_root_supply_driver(on_net,bus[i])) begin     
+                error = 1;                                                 
+                break;                                                     
+            end                                                            
+        end                                                                
+    end                                                                    
+                                                                           
+    if (error) begin                                                       
+        MSPA_PARALLEL_UPF1 = '{UPF::UNDETERMINED,0};                            
+        $swrite (str, "Different voltages driven by active drivers of parallel supply net %s\nDrivers are:-", res_net_name);
+        foreach (bus[i]) begin                                             
+            $swrite ( str, "%s\n",str);                                
+            $swrite ( str, "%s %s: {%p uV, %s}",str, net_name[i],    
+                           bus[i].voltage, get_net_state(bus[i]));         
+        end                                                                
+        $pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, %s ",        
+                   $pa_get_svrt("Error","8927","--"), "8927", "MSPA_RSLV_PARALLEL", $pa_pptime, str );
+    end                                                                    
+    else                                                                   
+        MSPA_PARALLEL_UPF1 = '{state,voltage};                             
+                                                                           
+endfunction                                                                
+
+                                                                         
+function UPF::supply_net_type MSPA_ONE_HOT_UPF1 (input UPF::supply_net_type bus[]    
+                ,input string res_net_name = "", input string net_name[] = {}); 
+                                                                           
+    automatic int count = 0;                                               
+    automatic int undeter_state = 0;                                       
+    automatic int idx = 0;                                                 
+    automatic string str;                                                  
+                                                                           
+    foreach(bus[i]) begin                                
+     if ( UPF::get_supply_on_state(bus[i]) ) begin                              
+          count++;                                                         
+          idx = i;                                                         
+     end                                                                   
+     if ( (bus[i].state) == UPF::UNDETERMINED ) begin                           
+          undeter_state = 1;                                               
+     end                                                                   
+    end                                                                    
+                                                                           
+    if (undeter_state == 1)                                                
+        MSPA_ONE_HOT_UPF1 = '{UPF::UNDETERMINED,0};                             
+    else if (count == 0)                                                   
+        MSPA_ONE_HOT_UPF1 = '{UPF::OFF,0};                                      
+    else if (count == 1)                                                   
+        MSPA_ONE_HOT_UPF1 = bus[idx];                                      
+    else begin                                                             
+        MSPA_ONE_HOT_UPF1 = '{UPF::UNDETERMINED,0};                             
+        $swrite (str,"More than one driver is ON for one_hot supply net: %s\nDrivers are:-", res_net_name);
+        foreach (bus[i]) begin                                  
+            $swrite ( str, "%s\n",str);                                
+            $swrite ( str, "%s %s: {%p uV, %s}",str, net_name[i],    
+                          bus[i].voltage, get_net_state(bus[i]));  
+        end                                                                
+        $pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, %s ",        
+                   $pa_get_svrt("Error","8928","--"), "8928", "MSPA_RSLV_ONE_HOT", $pa_pptime, str ); 
+    end                                                                    
+endfunction                                                                
+
+                                                                         
+function UPF::supply_net_type MSPA_STRONG_UPF1 (input UPF::supply_net_type bus[]);   
+                                                                           
+    automatic int voltage = 0;                                             
+    automatic UPF::state state;                                            
+                                                                           
+    state = bus[0].state;                                                  
+                                                                           
+    foreach (bus[i]) begin                                                 
+        case (bus[i].state)                                                
+            UPF::UNDETERMINED:                                                  
+               begin                                                       
+                   state = UPF::UNDETERMINED;                                   
+                   voltage = 0;                                            
+                   break;                                                  
+               end                                                         
+            UPF::PARTIAL_ON:                                                    
+               begin                                                       
+                   if(state != UPF::FULL_ON) begin                              
+                        state = UPF::PARTIAL_ON;                                
+                   end                                                     
+                   voltage = (voltage > bus[i].voltage) ? voltage : bus[i].voltage;
+               end                                                         
+            UPF::FULL_ON:                                                       
+               begin                                                       
+                   state = UPF::FULL_ON ;                                       
+                   voltage = (voltage > bus[i].voltage) ? voltage : bus[i].voltage;
+               end                                                         
+            UPF::OFF: ;                                                         
+            default : ;                                                    
+         endcase                                                           
+    end                                                                    
+    MSPA_STRONG_UPF1 = '{state,voltage};                                   
+endfunction                                                                
+
+                                                                         
+function UPF::supply_net_type MSPA_WEAK_UPF1 (input UPF::supply_net_type bus[]);     
+                                                                           
+    automatic int voltage = 0;                                             
+    automatic UPF::state state;                                            
+                                                                           
+    state = bus[0].state;                                                  
+    voltage = bus[0].voltage;                                              
+                                                                           
+    foreach (bus[i]) begin                                                 
+        case (bus[i].state)                                                
+            UPF::UNDETERMINED:                                                  
+               begin                                                       
+                   if(state == UPF::OFF || state == UPF::UNDETERMINED) begin         
+                        voltage = 0;                                       
+                        state = UPF::UNDETERMINED;                              
+                   end                                                     
+               end                                                         
+            UPF::PARTIAL_ON:                                                    
+               begin                                                       
+                   if(state == UPF::FULL_ON || state == UPF::PARTIAL_ON) begin       
+                        voltage = (voltage < bus[i].voltage) ? voltage : bus[i].voltage;
+                   end                                                     
+                   else begin                                              
+                        voltage = bus[i].voltage;                          
+                   end                                                     
+                   if(state != UPF::FULL_ON) begin                              
+                        state = UPF::PARTIAL_ON;                                
+                   end                                                     
+               end                                                         
+            UPF::FULL_ON:                                                       
+               begin                                                       
+                   if(state == UPF::FULL_ON || state == UPF::PARTIAL_ON) begin       
+                        voltage = (voltage < bus[i].voltage) ? voltage : bus[i].voltage;
+                   end                                                     
+                   else begin                                              
+                        voltage = bus[i].voltage;                          
+                   end                                                     
+                   state = UPF::FULL_ON ;                                       
+               end                                                         
+            UPF::OFF: ;                                                         
+            default : ;                                                    
+         endcase                                                           
+    end                                                                    
+    MSPA_WEAK_UPF1 = '{state,voltage};                                     
+endfunction                                                                
+
+                                                                         
+function UPF::supply_net_type MSPA_EITHER_UPF1 (input UPF::supply_net_type bus[]);   
+                                                                           
+    automatic int voltage = 0;                                             
+    automatic UPF::state state;                                            
+                                                                           
+    state = bus[0].state;                                                  
+    voltage = bus[0].voltage;                                              
+                                                                           
+    foreach (bus[i]) begin                                                 
+        case (bus[i].state)                                                
+            UPF::UNDETERMINED:                                                  
+               begin                                                       
+                   voltage = 0;                                            
+                   state = UPF::UNDETERMINED;                                   
+                   break;                                                  
+               end                                                         
+            UPF::PARTIAL_ON:                                                    
+               begin                                                       
+                   if(state == UPF::OFF) begin                                  
+                        voltage = bus[i].voltage;                          
+                   end                                                     
+                   else begin                                              
+                        voltage = (voltage < bus[i].voltage) ? voltage : bus[i].voltage;
+                   end                                                     
+                   if(state != UPF::FULL_ON) begin                              
+                        state = UPF::PARTIAL_ON;                                
+                   end                                                     
+               end                                                         
+            UPF::FULL_ON:                                                       
+               begin                                                       
+                   if(state == UPF::OFF) begin                                  
+                        voltage = bus[i].voltage;                          
+                   end                                                     
+                   else begin                                              
+                        voltage = (voltage < bus[i].voltage) ? voltage : bus[i].voltage;
+                   end                                                     
+                   state = UPF::FULL_ON ;                                       
+               end                                                         
+            UPF::OFF: ;                                                         
+            default : ;                                                    
+         endcase                                                           
+    end                                                                    
+    MSPA_EITHER_UPF1 = '{state,voltage};                                   
+endfunction                                                                
+
+                                                                         
+function bit are_states_equal (input UPF::supply_net_type net1, input UPF::supply_net_type net2, input apply_partial_on_translation);  
+    automatic UPF::state state1 = net1.state;                              
+    automatic UPF::state state2 = net2.state;                              
+    if (apply_partial_on_translation)                                      
+    begin                                                                  
+        if (state1 == UPF::PARTIAL_ON)                                          
+        begin                                                              
+            if  ($pa_partial_on_trans)                                     
+                state1 = UPF::FULL_ON;                                          
+            else                                                           
+                state1 = UPF::OFF;                                              
+        end                                                                
+        if (state2 == UPF::PARTIAL_ON)                                          
+        begin                                                              
+            if  ($pa_partial_on_trans)                                     
+                state2 = UPF::FULL_ON;                                          
+            else                                                           
+                state2 = UPF::OFF;                                              
+        end                                                                
+    end                                                                    
+    if (state1 == state2)                                                  
+        return 1'b1;                                                       
+    else                                                                   
+        return 1'b0;                                                       
+endfunction                                                                
+ function bit MSPA_PARALLEL_UPF1_CHECK (input UPF::supply_net_type bus[],       
+                                        input int width, input partial_on_tran);  
+     automatic int warning = 0;                                        
+    for (int i = 0 ; i < width-1; i ++) begin                          
+        if(bus[i].state == UPF::UNDETERMINED)                           
+        begin                                                          
+            warning = 1;                                               
+            break;                                                     
+        end                                                            
+        if (!are_states_equal(bus[i],bus[i+1],partial_on_tran))
+        begin                                                          
+            warning = 1;                                               
+            break;                                                     
+        end                                                            
+    end                                                                
+    if(bus[width -1].state == UPF::UNDETERMINED)                        
+    begin                                                              
+        warning = 1;                                                   
+    end                                                                
+    if (warning)                                                       
+        MSPA_PARALLEL_UPF1_CHECK = 1'b1;                               
+    else                                                               
+       MSPA_PARALLEL_UPF1_CHECK = 1'b0;                                
+ endfunction                                                           
+typedef enum {
+	UNDEFINED,
+	on_state,
+	off_state
+} state_enum;
+/********Types corresponding to Supply Set Objects**************/
+typedef struct packed { UPF::power_state_simstate currSimstate;UPF::supply_net_type ground ;UPF::supply_net_type power ;} upf_supply_set_type;
+upf_supply_set_type [20:0] upf_supply_set_type_ARR;
+typedef struct packed { UPF::power_state_simstate simMode ; upf_supply_set_type primary ;} pd_upf_supply_set_type;
+typedef struct packed { UPF::power_state_simstate simMode ; upf_supply_set_type primary ; state_enum currState; } pd1_upf_supply_set_type;
+pd_upf_supply_set_type [20:0] pd_upf_supply_set_type_ARR;
+pd1_upf_supply_set_type [20:0] pd1_upf_supply_set_type_ARR;
+typedef struct packed { UPF::power_state_simstate currSimstate ; UPF::supply_net_type power ; UPF::supply_net_type ground ; } def_upf_supply_set_type;
+typedef struct packed { UPF::power_state_simstate simMode ; def_upf_supply_set_type primary ;} pd_def_upf_supply_set_type;
+typedef struct packed { UPF::power_state_simstate simMode ; def_upf_supply_set_type primary ; state_enum currState; } pd1_def_upf_supply_set_type;
+pd_def_upf_supply_set_type [20:0] pd_def_upf_supply_set_type_ARR;
+pd1_def_upf_supply_set_type [20:0] pd1_def_upf_supply_set_type_ARR;
+/******************   End Supply Set Object Type   **************/
+	reg paopt_t0cond;
+	wire mspa27_pwr_en_instr;
+	UPF::supply_net_type mspa26_VDD_AO_instr;
+	state_enum mspa36_power_switch_PS_BLOCK_testO_dut_qpaupfScope1_testO_switch;
+	UPF::supply_net_type mspa25_vout_instr;
+	wire mspa21_pwr_en_instr;
+	wire mspa20_iso_ctrl_instr;
+	wire mspa19_save_ctrl_instr;
+	wire mspa18_restore_ctrl_instr;
+	UPF::supply_net_type mspa_supp3_VDD_AO  = '{UPF::OFF,0};
+	UPF::supply_net_type mspa_supp2_VDD_PG  = '{UPF::OFF,0};
+	UPF::supply_net_type mspa_supp1_VSS  = '{UPF::OFF,0};
+	reg mspa9_implicit_pd_top_level_DOMAIN_PWR;
+`line 1 "pa_reports/pa_substitute.txt" 1
+	reg [20:0] PA_PWR_ARR;
+	reg [20:0] PA_PWR_INSTR_ARR = '1;
+	wire [20:0] PA_PWR_INSTR_WIRE_ARR;
+	reg [20:0] PA_PWR_INSTR_SIM_NORM_ARR = '1;
+	reg [20:0] PA_SAVE_ARR;
+	reg [20:0] PA_SAVE_INSTR_ARR = '0;
+	reg [20:0] PA_RESTORE_ARR;
+	reg [20:0] PA_RESTORE_INSTR_ARR = '0;
+	reg [20:0] PA_RESTORE_RD_INSTR_ARR = '0;
+	reg [20:0] PA_RC_INST_PWR_ARR;
+	reg [20:0] PA_RC_INST_PWR_INSTR_ARR = '1;
+	wire [20:0] PA_RC_INST_PWR_INSTR_WIRE_ARR;
+	reg [20:0] PA_RET_EVENT_ARR_BIT7,PA_RET_EVENT_ARR_BIT6,PA_RET_EVENT_ARR_BIT5,PA_RET_EVENT_ARR_BIT4,PA_RET_EVENT_ARR_BIT3,PA_RET_EVENT_ARR_BIT2,PA_RET_EVENT_ARR_BIT1,PA_RET_EVENT_ARR_BIT0;
+	wire [20:0] PA_RET_PWR_INSTR_ARR;
+	reg [20:0] PA_ISO_ENABLE_ARR;
+	typedef struct{
+		string sStrtgyName;
+		string sPdName;
+		string sFileName;
+		int iLine;
+	} pd_handle;
+	pd_handle pdInfoTable[integer];
+	string sSignalNames[integer];
+	string sPaPrefix;
+	wire [20:0]PA_CS_W;//Signal used for power up
+	bit [20:0]PA_RCS_W;//Signal used for ret power up
+string sPaOptionString = "PAFLAGS1 16809984 PAFLAGS2 0 PAFLAGS3 0 PAFLAGS4 128 PACHKS1 0 PACHKS2 0 PAFILENM ../upf/design.upf PAROOT tb_top REPORTDIR pa_reports PAHIERPATHCNT 3 ";
+
+endpackage

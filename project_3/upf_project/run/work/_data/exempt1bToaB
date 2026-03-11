@@ -1,0 +1,670 @@
+`line 2 "mspa_vopt.v" 1
+/***************************************************
+ *               PA-RTLSim Netlist                 *
+ ***************************************************/
+
+`mspa_module
+
+`line 1 "pa_reports/pa_substitute.txt" 1
+module qpa_top;
+import mspa_pack_testO::*;
+parameter int pa_checkparam = 0, pa_psidparam_testO = 0;
+initial begin
+sSignalNames[0] = "high_to_low";
+sSignalNames[1] = "low_to_high";
+sSignalNames[2] = "";
+sSignalNames[3] = "}";
+end
+logic mspa_chk_rst;
+logic mspa_chk_rst_sampled;
+initial
+begin
+	$pa_assertoff();
+	mspa_chk_rst = 0;
+	#0 mspa_chk_rst = 1;
+end
+assign mspa_chk_rst_sampled = $sampled(mspa_chk_rst);
+always @(mspa_chk_rst_sampled)
+	begin
+	if(mspa_chk_rst_sampled === 1'b1)
+	 $pa_asserton();
+end
+parameter pa_prefix_testO = 1;
+initial mspa_pack_testO::sPaPrefix = "";
+PA_EVENT_PROCESSOR PA_HIGHLIGHT_INST_18 (.PWR_FROM_BIAS(1'b1), .PA_EVENT({mspa_pack_testO::PA_RET_EVENT_ARR_BIT7[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT6[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT5[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT4[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT3[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT2[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT1[18],mspa_pack_testO::PA_RET_EVENT_ARR_BIT0[18]}), .PWR_DOMAIN(mspa_pack_testO::PA_PWR_ARR[6]));
+	upf_iso_cell_model_pwr_testO inst_mspa11_ISO_BLOCK_ISO_PWR (
+		 .ISO(PA_ISO_ENABLE_ARR[12]),
+		 .PWR(PA_PWR_ARR[12])
+	 );
+
+// UPF Top's Instance
+upf_debug_top_testO upf_debug_top();
+
+
+bit [20:0]PA_RSIG = 0;//Signal used for power up
+bit [20:0]PA_SIG = 0;//Signal used for power up
+bit [20:0]PA_CS = 0;//Signal used for power up
+bit [20:0]PA_RCS = 0;//Signal used for power up
+assign PA_CS_W = PA_CS;//Signal used for power up
+assign PA_RCS_W = PA_RCS;//Signal used for power up
+
+
+initial begin
+	paopt_t0cond = 0;
+	#1 paopt_t0cond = 1;
+end
+
+	always @(posedge PA_PWR_INSTR_ARR[6])
+		PA_CS[6] = 1'b1;
+	always @(posedge PA_CS[6])
+		PA_SIG[6] = 1'b1;
+	always @(posedge PA_SIG[6]) begin
+		PA_CS[6] = 1'b0;
+		PA_SIG[6] = 1'b0;
+	end
+	always @(PA_PWR_INSTR_ARR[6])
+		PA_RCS[6] = 1'b1;
+	always @(posedge PA_RCS[6])
+		PA_RSIG[6] = 1'b1;
+	always @(posedge PA_RSIG[6]) begin
+		PA_RCS[6] = 1'b0;
+		PA_RSIG[6] = 1'b0;
+	end
+	always @(posedge PA_RET_PWR_INSTR_ARR[18])
+		PA_CS[18] = 1'b1;
+	always @(posedge PA_CS[18])
+		PA_SIG[18] = 1'b1;
+	always @(posedge PA_SIG[18]) begin
+		PA_CS[18] = 1'b0;
+		PA_SIG[18] = 1'b0;
+	end
+	always @(PA_RET_PWR_INSTR_ARR[18] or posedge PA_RESTORE_INSTR_ARR[18])
+		PA_RCS[18] = 1'b1;
+	always @(posedge PA_RCS[18])
+		PA_RSIG[18] = 1'b1;
+	always @(posedge PA_RSIG[18]) begin
+		PA_RCS[18] = 1'b0;
+		PA_RSIG[18] = 1'b0;
+	end
+	assign PA_RET_PWR_INSTR_ARR = ~(PA_RET_EVENT_ARR_BIT2);
+	assign PA_RESTORE_INSTR_ARR = (paopt_t0cond) ? (PA_RET_EVENT_ARR_BIT1 | PA_RET_EVENT_ARR_BIT6) : '0;
+	assign PA_SAVE_INSTR_ARR = (paopt_t0cond) ? PA_RET_EVENT_ARR_BIT0 : '0;
+	always @(posedge PA_PWR_INSTR_ARR[2])
+		PA_CS[2] = 1'b1;
+	always @(posedge PA_CS[2])
+		PA_SIG[2] = 1'b1;
+	always @(posedge PA_SIG[2]) begin
+		PA_CS[2] = 1'b0;
+		PA_SIG[2] = 1'b0;
+	end
+	always @(PA_PWR_INSTR_ARR[2])
+		PA_RCS[2] = 1'b1;
+	always @(posedge PA_RCS[2])
+		PA_RSIG[2] = 1'b1;
+	always @(posedge PA_RSIG[2]) begin
+		PA_RCS[2] = 1'b0;
+		PA_RSIG[2] = 1'b0;
+	end
+	always @(PA_PWR_ARR)
+	if(paopt_t0cond)
+		PA_PWR_INSTR_ARR = PA_PWR_ARR;
+	 else
+		#0 PA_PWR_INSTR_ARR = PA_PWR_ARR;
+
+	assign PA_PWR_INSTR_WIRE_ARR = (paopt_t0cond ? PA_PWR_INSTR_ARR : PA_PWR_ARR);
+
+//Vlog package signals
+qpa_debug_pack_testO qpa_debug_pack();
+
+/*Logic to generate int from simstate enum*/
+generate begin : int_enum_blk
+end endgenerate
+
+CORRUPT_testO inst_CORRUPT_2(
+ .PWR(PA_PWR_ARR[2])
+);
+
+CORRUPT_testO inst_CORRUPT_6(
+ .PWR(PA_PWR_ARR[6])
+);
+
+qpa_vl_dummy_chk_sig_mod_testO qpa_vl_dummy_chk_sig_mod();
+
+
+generate if(pa_checkparam == 1) begin : qpa_dummy_chk_genblk
+
+qpa_vh_chkr_mod_testO qpa_vh_chkr_mod_testO_1();
+
+end endgenerate
+endmodule
+/*===== CORRUPT POWER AWARE MODEL =====*/
+module CORRUPT_testO(PWR);
+   input PWR;
+   event mspa_corrupt_register;
+   event mspa_release_register;
+   initial begin
+        #0;
+        if(PWR === 1'bx || PWR === 1'b0)
+            ->mspa_corrupt_register;
+   end
+   always @(negedge PWR)
+     -> mspa_corrupt_register;
+   always @(posedge PWR)
+     -> mspa_release_register;
+endmodule
+/*===== CORRUPT POWER AWARE MODEL =====*/
+module MSPA_CRPT_DELAYED_FF_testO(input PWR, BIAS_TRIGGER, CLK, RESET, SET,D,output Q);
+    event  pa_reset_register,pa_set_register;
+    event  pa_corrupt_register,pa_release_register;
+
+   initial begin
+        #0;
+        if(PWR === 1'bx || PWR === 1'b0)
+            ->pa_corrupt_register;
+   end
+    always@(posedge PWR or BIAS_TRIGGER)
+    begin
+       ->pa_release_register;
+       #0
+       if(RESET) 
+         ->pa_reset_register;
+       else if(SET) 
+         ->pa_set_register;
+    end
+    always@(negedge PWR)
+       ->pa_corrupt_register;
+endmodule
+/*===== BIAS CORRUPT POWER AWARE MODEL =====*/
+module BIAS_CORRUPT_testO(in_bias_mode);
+    input in_bias_mode;
+    event pa_bias_mode_on;
+    event pa_bias_mode_off;
+    initial begin
+        #0;
+        if(in_bias_mode === 1'b1)
+            ->pa_bias_mode_on;
+    end
+    always @(posedge in_bias_mode)
+        -> pa_bias_mode_on;
+    always @(negedge in_bias_mode)
+        -> pa_bias_mode_off;
+endmodule
+module upf_iso_cell_model_pwr_testO(ISO,PWR);
+   input ISO,PWR;
+   event mspa_corrupt_register;
+   event mspa_release_register;
+   event mspa_iso_on;
+   initial begin
+        #0;
+        if(PWR === 1'bx || PWR === 1'b0)
+            ->mspa_corrupt_register;
+        else if(PWR === 1'b1 && ISO === 1'b1)
+            ->mspa_iso_on;
+   end
+   always @(posedge ISO)
+   begin
+     if(PWR)
+     begin
+      	if(ISO === 1'bx)
+           	-> mspa_corrupt_register;
+      	else
+              -> mspa_iso_on;
+     end
+   end
+   always @(negedge ISO)
+   begin
+     if(PWR)
+     begin
+      	if(ISO === 1'bx)
+           	-> mspa_corrupt_register;
+      	else
+              -> mspa_release_register;
+    	end
+   end
+   always @(posedge PWR)
+   begin
+      if(ISO === 1'b1)
+           -> mspa_iso_on;
+      else if(ISO === 1'b0)
+           -> mspa_release_register;
+   end
+   always @(negedge PWR)
+     -> mspa_corrupt_register;
+endmodule
+
+module upf_retention_ret (
+  CLK, RESET,SET,
+  RET, PWR, RETPWR,
+  BIAS_TRIGGER, D, Q
+ );
+
+  input CLK;
+  input RESET;
+  input SET;
+  input RET;
+  input PWR;
+  input RETPWR;
+  input BIAS_TRIGGER;
+
+  output Q;
+  input  D;
+
+  event pa_store_value ;
+  event pa_store_x ;
+  event pa_restore_value ;
+  event pa_corrupt_register ;
+  event pa_release_register ;
+  event pa_set_register;
+  event pa_reset_register;
+
+  initial begin
+    #0;
+    if(PWR === 1'bx || PWR === 1'b0)
+        ->pa_corrupt_register;
+  end
+   
+  always @(PWR or RETPWR or BIAS_TRIGGER) begin: pwr_down_proc
+      if (PWR && RETPWR) begin
+          -> pa_release_register;
+          #0 
+          if (RESET) -> pa_reset_register;
+          else if (SET) -> pa_set_register;
+  
+      end else begin 
+          -> pa_corrupt_register;
+          if (!RETPWR) begin 
+          -> pa_store_x;
+          end
+      end
+  end: pwr_down_proc
+  
+  always @(negedge RET) begin: restore_proc
+      if (PWR && RETPWR && ~RET) begin
+          -> pa_restore_value;
+      end
+  end: restore_proc
+  
+  
+  always @(posedge RET) begin: save_proc
+      if (RETPWR && RET) begin
+          -> pa_store_value;
+      end
+  end: save_proc
+  
+
+endmodule
+
+module mspa_generic_power_switch_model_testO
+ #(parameter NUM_INPUT_PORTS = 0, NUM_CTRL_PORTS = 0, NUM_ON_STATES = 0,
+	NUM_P_ON_STATES = 0, NUM_OFF_STATES = 0, NUM_ERR_STATES = 0, EN_DELAY = 0) (
+	 input UPF::supply_net_type [1:NUM_INPUT_PORTS] in_ports,
+	 input [1:NUM_CTRL_PORTS] ctrl_ports,
+	 input [1:NUM_ON_STATES] on_states,
+	 input mspa_pack_testO::state_enum on_states_enums [1:NUM_ON_STATES],
+	 input UPF::supply_net_type [1:NUM_ON_STATES] on_states_inputs,
+	 input var integer on_states_out_volts [1:NUM_ON_STATES],
+	 input [1:NUM_P_ON_STATES] p_on_states,
+	 input mspa_pack_testO::state_enum p_on_states_enums [1:NUM_P_ON_STATES],
+	 input UPF::supply_net_type [1:NUM_P_ON_STATES] p_on_states_inputs,
+	 input var integer p_on_states_out_volts [1:NUM_P_ON_STATES],
+	 input [1:NUM_OFF_STATES] off_states,
+	 input mspa_pack_testO::state_enum off_states_enums [1:NUM_OFF_STATES],
+	 input [1:NUM_ERR_STATES] error_states,
+	 input mspa_pack_testO::state_enum error_states_enums [1:NUM_ERR_STATES],
+	 input pwr_sig,
+	 input string sw_name,
+	 input string out_name,
+	 input int delay,
+	 output UPF::supply_net_type sw_out_port,
+	 output UPF::state switch_state,
+	 output mspa_pack_testO::state_enum psw_state_enum
+);
+	import UPF::*;
+	/* Declarations for state count*/
+	int error_state_count, on_state_count, off_state_count, p_on_state_count,xcount;
+	int on_state_found, undetermined_state;
+	bit internal_state = 0;
+	int i = 0;
+	supply_net_type on_state_port;
+
+	/* Behavioral code for Power Switch */
+	always @( in_ports, ctrl_ports, pwr_sig)
+	begin:switch_logic
+		if (pwr_sig)
+		begin
+			on_state_count = 0 ;
+			off_state_count = 0 ;
+			error_state_count = 0 ;
+			p_on_state_count = 0 ;
+			on_state_found = 0 ;
+			undetermined_state = 0 ;
+			xcount = 0 ;
+			on_state_port.state = UNDETERMINED ;
+
+			for(i = 1; i <= NUM_ON_STATES; i = i+1)
+			begin
+				if(on_states[i])
+					on_state_count = on_state_count + 1;
+				else if(((on_states[i]) === 1'bx || (on_states[i]) === 1'bz) && (on_states_inputs[i].state !== OFF))
+					xcount = 1;
+			end
+			for(i = 1; i <= NUM_P_ON_STATES; i = i+1)
+			begin
+				if(p_on_states[i])
+					p_on_state_count = p_on_state_count + 1;
+				else if(((p_on_states[i]) === 1'bx || (p_on_states[i]) === 1'bz) && (p_on_states_inputs[i].state !== OFF))
+					xcount = 1;
+			end
+
+			for(i = 1; i <= NUM_OFF_STATES; i = i+1)
+			begin
+				if(off_states[i])
+				begin
+					off_state_count = off_state_count + 1;
+					psw_state_enum = off_states_enums[i];
+				end
+			end
+
+			for(i = 1; i <= NUM_ERR_STATES; i = i+1)
+			begin
+				if(error_states[i])
+				begin
+					error_state_count = error_state_count + 1;
+					psw_state_enum = error_states_enums[i];
+				end
+			end
+
+			if(error_state_count > 0)
+			begin
+				sw_out_port.state = UNDETERMINED;
+				sw_out_port.voltage = 0;
+				switch_state = UNDETERMINED;
+			end
+			else if( (off_state_count > 0 && ( on_state_count > 0 || p_on_state_count > 0)) || xcount > 0 )
+			begin
+				sw_out_port.state = UNDETERMINED;
+				sw_out_port.voltage = 0;
+				switch_state = UNDETERMINED;
+				if (internal_state)
+				begin
+					$pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, Power Switch (%s) output supply %s toggled to UNDTEREMINED state before switch ON delay expired ",$pa_get_svrt("Error","8964","--"), "8964", "MSPA_CHK_ON_DELAY", $pa_pptime, sw_name, out_name);
+				end
+			end
+			else if( on_state_count >= 1 )
+			begin
+				on_state_found = 0;
+				undetermined_state = 0;
+				for(i = 1; i <= NUM_ON_STATES; i = i+1)
+				begin
+					if(on_states[i])
+					begin
+						if(on_state_found > 0)
+						begin
+							if (on_states_out_volts[i] >= 0)
+							begin
+								if(on_state_port.voltage != on_states_out_volts[i])
+									undetermined_state = 1;
+							end
+							else
+							begin
+								if(!mspa_pack_testO::is_same_root_supply_driver(on_states_inputs[i],on_state_port))
+									undetermined_state = 1;
+							end
+						end
+						on_state_found = 1;
+						psw_state_enum = on_states_enums[i];
+						if (on_state_port.state != PARTIAL_ON)
+							on_state_port.state = on_states_inputs[i].state;
+						if (on_states_out_volts[i] >= 0)
+							on_state_port.voltage = on_states_out_volts[i];
+						else
+							on_state_port.voltage = on_states_inputs[i].voltage;
+					end
+				end
+
+				if (undetermined_state == 0)
+				begin
+					if(EN_DELAY)
+					begin
+						internal_state = 1;
+						internal_state <= #delay 0;
+						sw_out_port.state <= #delay on_state_port.state;
+						sw_out_port.voltage <= #delay on_state_port.voltage;
+						switch_state <= #delay FULL_ON;
+					end
+					else
+					begin
+						sw_out_port.state = on_state_port.state;
+						sw_out_port.voltage = on_state_port.voltage;
+						switch_state = FULL_ON;
+					end
+				end
+				else
+				begin
+					automatic string str;
+					$swrite (str,"Switch '%s' : Multiple -on_state with respective input ports driven by different root supply driver evaluates to true ", sw_name);
+					$pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, %s ", $pa_get_svrt("Error","8947","--"), "8947", "MSPA_SW_ON_STATE", $pa_pptime, str );
+					sw_out_port.state = UNDETERMINED;
+					sw_out_port.voltage = 0;
+					switch_state = UNDETERMINED;
+					psw_state_enum = mspa_pack_testO::UNDEFINED;
+					if (internal_state)
+					begin
+						$pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, Power Switch (%s) output supply %s toggled to UNDTEREMINED state before switch ON delay expired ",$pa_get_svrt("Error","8964","--"), "8964", "MSPA_CHK_ON_DELAY", $pa_pptime, sw_name, out_name);
+					end
+				end
+			end
+			else if( off_state_count > 0 )
+			begin
+				sw_out_port.state = OFF;
+				sw_out_port.voltage = 0;
+				switch_state = OFF;
+				if (internal_state)
+				begin
+					$pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, Power Switch (%s) output supply %s toggled to OFF state before switch ON delay expired ",$pa_get_svrt("Error","8964","--"), "8964", "MSPA_CHK_ON_DELAY", $pa_pptime, sw_name, out_name);
+				end
+			end
+			else if( p_on_state_count >= 1 )
+			begin
+				on_state_found = 0;
+				undetermined_state = 0;
+				for(i = 1; i <= NUM_P_ON_STATES; i = i+1)
+				begin
+					if(p_on_states[i])
+					begin
+						if(on_state_found > 0)
+						begin
+							if (p_on_states_out_volts[i] >= 0)
+							begin
+								if(on_state_port.voltage != p_on_states_out_volts[i])
+									undetermined_state = 1;
+							end
+							else
+							begin
+								if(!mspa_pack_testO::is_same_root_supply_driver(p_on_states_inputs[i],on_state_port))
+									undetermined_state = 1;
+							end
+						end
+						on_state_found = 1;
+						psw_state_enum = p_on_states_enums[i];
+						if (on_state_port.state != PARTIAL_ON)
+							on_state_port.state = p_on_states_inputs[i].state;
+						if (p_on_states_out_volts[i] >= 0)
+							on_state_port.voltage = p_on_states_out_volts[i];
+						else
+							on_state_port.voltage = p_on_states_inputs[i].voltage;
+					end
+				end
+
+				if (undetermined_state == 0)
+				begin
+					if (on_state_port.state == FULL_ON)
+						on_state_port.state = PARTIAL_ON;
+					if(EN_DELAY)
+					begin
+						internal_state = 1;
+						internal_state <= #delay 0;
+						sw_out_port.state <= #delay on_state_port.state;
+						sw_out_port.voltage <= #delay on_state_port.voltage;
+						switch_state <= #delay PARTIAL_ON;
+					end
+					else
+					begin
+						sw_out_port.state = on_state_port.state;
+						sw_out_port.voltage = on_state_port.voltage;
+						switch_state = PARTIAL_ON;
+					end
+				end
+				else
+				begin
+					automatic string str;
+					$swrite (str,"Switch '%s' : Multiple -on_partial_state with respective input ports driven by different root supply driver evaluates to true ", sw_name);
+					$pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, %s ", $pa_get_svrt("Error","8947","--"), "8947", "MSPA_SW_ON_STATE", $pa_pptime, str );
+					sw_out_port.state = UNDETERMINED;
+					sw_out_port.voltage = 0;
+					switch_state = UNDETERMINED;
+					psw_state_enum = mspa_pack_testO::UNDEFINED;
+					if (internal_state)
+					begin
+						$pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, Power Switch (%s) output supply %s toggled to UNDTEREMINED state before switch ON delay expired ",$pa_get_svrt("Error","8964","--"), "8964", "MSPA_CHK_ON_DELAY", $pa_pptime, sw_name, out_name);
+					end
+				end
+			end
+			else
+			begin
+				sw_out_port.state = OFF;
+				sw_out_port.voltage = 0;
+				switch_state = OFF;
+				if (internal_state)
+				begin
+					$pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, Power Switch (%s) output supply %s toggled to OFF state before switch ON delay expired ",$pa_get_svrt("Error","8964","--"), "8964", "MSPA_CHK_ON_DELAY", $pa_pptime, sw_name, out_name);
+				end
+			end
+		end
+		else
+		begin
+			sw_out_port.state = UNDETERMINED;
+			if (internal_state)
+			begin
+				$pa_messagelog( "%:S (vsim-%:I) %:C: Time: %s, Power Switch (%s) output supply %s toggled to UNDTEREMINED state before switch ON delay expired ",$pa_get_svrt("Error","8964","--"), "8964", "MSPA_CHK_ON_DELAY", $pa_pptime, sw_name, out_name);
+			end
+		end
+	end
+endmodule
+
+
+module mspa_assert_r_mutex_check_info_model_4( ret_strategy_name, pd_name, is_save_signal_complement, save_signal_name, save_signal, is_assert_r_mutex_complement, assert_r_mutex_signal_name, assert_r_mutex_signal, upf_file_name, upf_line_num );
+    input string ret_strategy_name;
+    input string pd_name;
+    input int is_save_signal_complement;
+    input string save_signal_name;
+    input reg save_signal;
+    input int is_assert_r_mutex_complement;
+    input string assert_r_mutex_signal_name;
+    input reg assert_r_mutex_signal;
+    input string upf_file_name;
+    input string upf_line_num;
+        always @( posedge save_signal ) begin:assert_s_mutex_check_blk
+                QPA_ASSERT_R_MUTEX_BLK_1: (*UPF_PA_OBJ = "TRUE"*)  assert (!assert_r_mutex_signal) else $pa_messagelog(
+                "%:S (vsim-%:I) %:C: Time: %s, 'assert_r_mutex' defined for retention strategy '%s' of Power Domain '%s' failed.Save signal '%s' ('%s') and signal '%s' ('%s') are not mutually exclusive.\nFile: %s, Line: %d", $pa_get_svrt("Error","8993"), "8993", "QPA_ASSERT_R_MUTEX",$pa_pptime, ret_strategy_name, pd_name, save_signal_name, (is_save_signal_complement == 0) ? ("posedge") : ("negedge"), assert_r_mutex_signal_name, (is_assert_r_mutex_complement == 0) ? ("high") : ("low"), upf_file_name, upf_line_num);
+        end
+endmodule
+
+
+module mspa_assert_r_mutex_check_info_model_3( ret_strategy_name, pd_name, is_save_signal_complement, save_signal_name, save_signal, is_assert_r_mutex_complement, assert_r_mutex_signal_name, assert_r_mutex_signal, upf_file_name, upf_line_num );
+    input string ret_strategy_name;
+    input string pd_name;
+    input int is_save_signal_complement;
+    input string save_signal_name;
+    input reg save_signal;
+    input int is_assert_r_mutex_complement;
+    input string assert_r_mutex_signal_name;
+    input reg assert_r_mutex_signal;
+    input string upf_file_name;
+    input string upf_line_num;
+        always @( posedge assert_r_mutex_signal ) begin:assert_r_mutex_check_blk
+                QPA_ASSERT_R_MUTEX_BLK_1: (*UPF_PA_OBJ = "TRUE"*)  assert (!save_signal) else $pa_messagelog(
+                "%:S (vsim-%:I) %:C: Time: %s, 'assert_r_mutex' defined for retention strategy '%s' of Power Domain '%s' failed.Save signal '%s' ('%s') and signal '%s' ('%s') are not mutually exclusive.\nFile: %s, Line: %d", $pa_get_svrt("Error","8993"), "8993", "QPA_ASSERT_R_MUTEX",$pa_pptime, ret_strategy_name, pd_name, save_signal_name, (is_save_signal_complement == 0) ? ("high") : ("low"), assert_r_mutex_signal_name, (is_assert_r_mutex_complement == 0) ? ("posedge") : ("negedge"), upf_file_name, upf_line_num);
+        end
+endmodule
+
+
+module mspa_assert_r_mutex_check_info_model_2( ret_strategy_name, pd_name, is_save_signal_complement, save_signal_name, save_signal, is_assert_r_mutex_complement, assert_r_mutex_signal_name, assert_r_mutex_signal, upf_file_name, upf_line_num );
+    input string ret_strategy_name;
+    input string pd_name;
+    input int is_save_signal_complement;
+    input string save_signal_name;
+    input reg save_signal;
+    input int is_assert_r_mutex_complement;
+    input string assert_r_mutex_signal_name;
+    input reg assert_r_mutex_signal;
+    input string upf_file_name;
+    input string upf_line_num;
+        always @( save_signal or assert_r_mutex_signal ) begin:assert_r_mutex_check_blk
+                QPA_ASSERT_R_MUTEX_BLK_1: (*UPF_PA_OBJ = "TRUE"*)  assert (!( save_signal && assert_r_mutex_signal )) else $pa_messagelog(
+                "%:S (vsim-%:I) %:C: Time: %s, 'assert_r_mutex' defined for retention strategy '%s' of Power Domain '%s' failed.Save signal '%s' ('%s') and signal '%s' ('%s') are not mutually exclusive.\nFile: %s, Line: %d", $pa_get_svrt("Error","8993"), "8993", "QPA_ASSERT_R_MUTEX",$pa_pptime, ret_strategy_name, pd_name, save_signal_name, (is_save_signal_complement == 0) ? ("high") : ("low"), assert_r_mutex_signal_name, (is_assert_r_mutex_complement == 0) ? ("high") : ("low"), upf_file_name, upf_line_num);
+        end
+endmodule
+
+
+module mspa_assert_s_mutex_check_info_model_4( ret_strategy_name, pd_name, is_save_signal_complement, save_signal_name, save_signal, is_assert_s_mutex_complement, assert_s_mutex_signal_name, assert_s_mutex_signal, upf_file_name, upf_line_num );
+    input string ret_strategy_name;
+    input string pd_name;
+    input int is_save_signal_complement;
+    input string save_signal_name;
+    input reg save_signal;
+    input int is_assert_s_mutex_complement;
+    input string assert_s_mutex_signal_name;
+    input reg assert_s_mutex_signal;
+    input string upf_file_name;
+    input string upf_line_num;
+        always @( posedge save_signal ) begin:assert_s_mutex_check_blk
+                QPA_ASSERT_S_MUTEX_BLK_1: (*UPF_PA_OBJ = "TRUE"*)  assert (!assert_s_mutex_signal) else $pa_messagelog(
+                "%:S (vsim-%:I) %:C: Time: %s, 'assert_s_mutex' defined for retention strategy '%s' of Power Domain '%s' failed.Save signal '%s' ('%s') and signal '%s' ('%s') are not mutually exclusive.\nFile: %s, Line: %d", $pa_get_svrt("Error","8993"), "8993", "QPA_ASSERT_S_MUTEX",$pa_pptime, ret_strategy_name, pd_name, save_signal_name, (is_save_signal_complement == 0) ? ("posedge") : ("negedge"), assert_s_mutex_signal_name, (is_assert_s_mutex_complement == 0) ? ("high") : ("low"), upf_file_name, upf_line_num);
+        end
+endmodule
+
+
+module mspa_assert_s_mutex_check_info_model_3( ret_strategy_name, pd_name, is_save_signal_complement, save_signal_name, save_signal, is_assert_s_mutex_complement, assert_s_mutex_signal_name, assert_s_mutex_signal, upf_file_name, upf_line_num );
+    input string ret_strategy_name;
+    input string pd_name;
+    input int is_save_signal_complement;
+    input string save_signal_name;
+    input reg save_signal;
+    input int is_assert_s_mutex_complement;
+    input string assert_s_mutex_signal_name;
+    input reg assert_s_mutex_signal;
+    input string upf_file_name;
+    input string upf_line_num;
+        always @( posedge assert_s_mutex_signal ) begin:assert_s_mutex_check_blk
+                QPA_ASSERT_S_MUTEX_BLK_1: (*UPF_PA_OBJ = "TRUE"*)  assert (!save_signal) else $pa_messagelog(
+                "%:S (vsim-%:I) %:C: Time: %s, 'assert_s_mutex' defined for retention strategy '%s' of Power Domain '%s' failed.Save signal '%s' ('%s') and signal '%s' ('%s') are not mutually exclusive.\nFile: %s, Line: %d", $pa_get_svrt("Error","8993"), "8993", "QPA_ASSERT_S_MUTEX",$pa_pptime, ret_strategy_name, pd_name, save_signal_name, (is_save_signal_complement == 0) ? ("high") : ("low"), assert_s_mutex_signal_name, (is_assert_s_mutex_complement == 0) ? ("posedge") : ("negedge"), upf_file_name, upf_line_num);
+        end
+endmodule
+
+
+module mspa_assert_s_mutex_check_info_model_2( ret_strategy_name, pd_name, is_save_signal_complement, save_signal_name, save_signal, is_assert_s_mutex_complement, assert_s_mutex_signal_name, assert_s_mutex_signal, upf_file_name, upf_line_num );
+    input string ret_strategy_name;
+    input string pd_name;
+    input int is_save_signal_complement;
+    input string save_signal_name;
+    input reg save_signal;
+    input int is_assert_s_mutex_complement;
+    input string assert_s_mutex_signal_name;
+    input reg assert_s_mutex_signal;
+    input string upf_file_name;
+    input string upf_line_num;
+        always @( save_signal or assert_s_mutex_signal ) begin:assert_s_mutex_check_blk
+                QPA_ASSERT_S_MUTEX_BLK_1: (*UPF_PA_OBJ = "TRUE"*)  assert (!( save_signal && assert_s_mutex_signal )) else $pa_messagelog(
+                "%:S (vsim-%:I) %:C: Time: %s, 'assert_s_mutex' defined for retention strategy '%s' of Power Domain '%s' failed.Save signal '%s' ('%s') and signal '%s' ('%s') are not mutually exclusive.\nFile: %s, Line: %d", $pa_get_svrt("Error","8993"), "8993", "QPA_ASSERT_S_MUTEX",$pa_pptime, ret_strategy_name, pd_name, save_signal_name, (is_save_signal_complement == 0) ? ("high") : ("low"), assert_s_mutex_signal_name, (is_assert_s_mutex_complement == 0) ? ("high") : ("low"), upf_file_name, upf_line_num);
+        end
+endmodule
+
+module mspa_upf_supply_conn(out, in);
+import UPF::*;
+input supply_net_type in;
+output supply_net_type out;
+assign out = in;
+endmodule
+module mspa_retention_info_model(input saveSignal, restoreSignal, rtcCond, saveCond, restoreCond, retPwr);
+endmodule
